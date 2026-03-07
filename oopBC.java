@@ -10,7 +10,7 @@ import javax.swing.*;
 import javax.swing.border.*;
 
 // ════════════════════════════════════════════════════════════
-//  Philippine National Banco — Premium UI v3 (fixed layout)
+//  Philippine National Banco — v2
 // ════════════════════════════════════════════════════════════
 public class oopBC extends JFrame {
 
@@ -66,7 +66,7 @@ public class oopBC extends JFrame {
     }
 
     // ════════════════════════════════════════════════════════
-    //  SCREENS
+    //  Frames <3
     // ════════════════════════════════════════════════════════
     void showMain() {
         JPanel root = bg();
@@ -119,9 +119,9 @@ public class oopBC extends JFrame {
 
         JPanel body = bg();
         body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
-        body.setBorder(new EmptyBorder(22, 26, 16, 12)); // right reduced to match scrollbar width
+        body.setBorder(new EmptyBorder(22, 26, 16, 16)); 
 
-        // ── Balance hero card ─────────────────────────────
+        // ── Balance :p ─────────────────────────────
         JPanel balCard = new JPanel(new BorderLayout()) {
             @Override
             protected void paintComponent(Graphics g) {
@@ -184,7 +184,7 @@ public class oopBC extends JFrame {
         body.add(tiles);
         body.add(vg(22));
 
-        // ── Quick Actions (CENTERED) ──────────────────────
+        // ── Quick Actions :> ──────────────────────
         JLabel qaLbl = new JLabel("Quick Actions", SwingConstants.CENTER);
         qaLbl.setFont(F_SUB);
         qaLbl.setForeground(C_TEXT);
@@ -193,7 +193,7 @@ public class oopBC extends JFrame {
         body.add(qaLbl);
         body.add(vg(10));
 
-        // 2 rows × 4 cols to include Transfer + History tiles
+        // ── 2 rows × 4 cols :D ──────────────────────
         JPanel grid = new JPanel(new GridLayout(2, 4, 10, 10));
         grid.setOpaque(false);
         grid.setMaximumSize(new Dimension(490, 126));
@@ -226,14 +226,14 @@ public class oopBC extends JFrame {
         sp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         sp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         sp.getVerticalScrollBar().setUnitIncrement(16);
-        sp.getVerticalScrollBar().setPreferredSize(new Dimension(14, 0)); // fixed 14px scrollbar
+        sp.getVerticalScrollBar().setPreferredSize(new Dimension(14, 0));
         root.add(sp, BorderLayout.CENTER);
         root.add(mkFooter(), BorderLayout.SOUTH);
         swap(root);
     }
 
     // ════════════════════════════════════════════════════════
-    //  FEATURES
+    //  Features for ya (create account, login, curr exchange, deposit, withdraw, transfer)
     // ════════════════════════════════════════════════════════
     void showCreateAccount() {
         JPanel p = dlgPanel("Create New Account", "Join Philippine National Banco today");
@@ -504,13 +504,9 @@ public class oopBC extends JFrame {
         ok("\ud83d\udcb1 Result\n\n" + result + "\n\n(Approximate market rates)");
     }
 
-    // ════════════════════════════════════════════════════════
-    //  TRANSFER BETWEEN ACCOUNTS
-    // ════════════════════════════════════════════════════════
     void showTransfer() {
         BankAccount sender = accounts[loggedIn];
 
-        // ── Step 1: Input dialog ──────────────────────────
         JPanel p = new JPanel();
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
         p.setBackground(Color.WHITE);
@@ -529,7 +525,6 @@ public class oopBC extends JFrame {
         p.add(sub);
         p.add(Box.createVerticalStrut(14));
 
-        // Wallet balance info bar
         JPanel infoBar = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
         infoBar.setBackground(C_IBG);
         infoBar.setBorder(BorderFactory.createCompoundBorder(
@@ -558,7 +553,6 @@ public class oopBC extends JFrame {
             return;
         }
 
-        // ── Validate recipient ────────────────────────────
         long recipientId;
         try {
             recipientId = Long.parseLong(recipientIdF.getText().trim());
@@ -584,7 +578,6 @@ public class oopBC extends JFrame {
             return;
         }
 
-        // ── Validate amount ───────────────────────────────
         double amt = safeD(amountF.getText().trim());
         if (amt <= 0) {
             return;
@@ -595,7 +588,6 @@ public class oopBC extends JFrame {
             return;
         }
 
-        // ── Step 2: Confirmation dialog ───────────────────
         BankAccount recipient = accounts[recipientIdx];
         String note = noteF.getText().trim().isEmpty() ? "No note" : noteF.getText().trim();
 
@@ -634,7 +626,6 @@ public class oopBC extends JFrame {
             return;
         }
 
-        // ── Step 3: Execute transfer ──────────────────────
         sender.withdrawWallet(amt);
         recipient.depositWallet(amt);
 
@@ -650,9 +641,6 @@ public class oopBC extends JFrame {
         showDashboard();
     }
 
-    // ════════════════════════════════════════════════════════
-    //  FULL TRANSACTION HISTORY
-    // ════════════════════════════════════════════════════════
     void showFullHistory() {
         BankAccount a = accounts[loggedIn];
         String[] txs = a.getLastTransactions();
@@ -717,7 +705,7 @@ public class oopBC extends JFrame {
     }
 
     // ════════════════════════════════════════════════════════
-    //  UI BUILDERS
+    //  ui buildersssssss
     // ════════════════════════════════════════════════════════
     JPanel mkHeader(String l1, String l2, String l3) {
         JPanel outer = new JPanel() {
@@ -943,7 +931,6 @@ public class oopBC extends JFrame {
         return l;
     }
 
-    // Centered transaction row for the dashboard card
     JPanel txRowCentered(String tx) {
         JPanel row = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
         row.setOpaque(false);
@@ -1005,7 +992,6 @@ public class oopBC extends JFrame {
         return p;
     }
 
-    // ── Dialog helpers ───────────────────────────────────────
     JPanel dlgPanel(String title, String sub) {
         JPanel p = new JPanel();
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
@@ -1120,9 +1106,6 @@ public class oopBC extends JFrame {
         repaint();
     }
 
-    // ════════════════════════════════════════════════════════
-    //  PERSISTENCE
-    // ════════════════════════════════════════════════════════
     static void saveData() {
         try (PrintWriter pw = new PrintWriter(new FileWriter(FILE_NAME))) {
             pw.println(accountCount);
@@ -1152,9 +1135,6 @@ public class oopBC extends JFrame {
     }
 }
 
-// ════════════════════════════════════════════════════════════
-//  BankAccount
-// ════════════════════════════════════════════════════════════
 class BankAccount {
 
     private final long id;
