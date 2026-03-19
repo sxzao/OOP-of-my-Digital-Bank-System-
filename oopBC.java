@@ -9,103 +9,245 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.border.*;
 
-// ════════════════════════════════════════════════════════════
-//  Philippine National Banco — v2
-// ════════════════════════════════════════════════════════════
 public class oopBC extends JFrame {
 
-    static final String FILE_NAME = "BCkd.txt";
+    static final String FILE = "wrath.txt";
     static BankAccount[] accounts = new BankAccount[100];
-    static int accountCount = 0;
+    static int count = 0;
     static long nextId = 66671001;
     static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss");
-
-    // ── Palette ──────────────────────────────────────────────
-    static final Color C_BG = new Color(228, 235, 250);
-    static final Color C_CARD = new Color(255, 255, 255);
-    static final Color C_G1 = new Color(52, 115, 235);
-    static final Color C_G2 = new Color(108, 70, 228);
-    static final Color C_ACCENT = new Color(52, 115, 235);
-    static final Color C_TEXT = new Color(18, 28, 52);
-    static final Color C_SUB = new Color(90, 102, 128);
-    static final Color C_HINT = new Color(155, 165, 185);
-    static final Color C_IBRD = new Color(205, 215, 238);
-    static final Color C_IBG = new Color(244, 247, 254);
-    static final Color C_GREEN = new Color(22, 175, 110);
-    static final Color C_RED = new Color(225, 58, 58);
-    static final Color C_GOLD = new Color(240, 165, 20);
-
-    // ── Fonts ────────────────────────────────────────────────
-    static final Font F_HERO = new Font("Segoe UI", Font.BOLD, 24);
-    static final Font F_TITLE = new Font("Segoe UI", Font.BOLD, 18);
-    static final Font F_SUB = new Font("Segoe UI", Font.BOLD, 14);
-    static final Font F_BODY = new Font("Segoe UI", Font.PLAIN, 13);
-    static final Font F_SMALL = new Font("Segoe UI", Font.PLAIN, 11);
-    static final Font F_BTN = new Font("Segoe UI", Font.BOLD, 13);
-    static final Font F_LBL = new Font("Segoe UI", Font.PLAIN, 12);
-    static final Font F_NUM = new Font("Segoe UI", Font.BOLD, 15);
-    static final Font F_MONO = new Font("Courier New", Font.BOLD, 11);
-
     private int loggedIn = -1;
 
-    // ════════════════════════════════════════════════════════
+    static final Color BG = new Color(11, 13, 18), SURFACE = new Color(18, 21, 28),
+            CARD = new Color(24, 28, 38), HOVER = new Color(30, 35, 48),
+            BORDER = new Color(40, 46, 62), ACCENT = new Color(56, 128, 240),
+            ACCH = new Color(38, 98, 200), GREEN = new Color(48, 190, 120),
+            RED = new Color(230, 75, 75), GOLD = new Color(220, 170, 40),
+            T1 = new Color(228, 232, 242), T2 = new Color(130, 142, 170), T3 = new Color(64, 74, 98);
+
+    static final Font FH = new Font("Segoe UI", Font.BOLD, 15), FS = new Font("Segoe UI", Font.BOLD, 13),
+            FB = new Font("Segoe UI", Font.PLAIN, 13), FM = new Font("Segoe UI", Font.PLAIN, 11),
+            FL = new Font("Segoe UI", Font.BOLD, 10), FN = new Font("Segoe UI", Font.BOLD, 14),
+            FG = new Font("Segoe UI", Font.BOLD, 26), FEM = new Font("Segoe UI Emoji", Font.PLAIN, 18);
+
+    static final double LOAN_MIN = 500;
+    static final double[] TIER_REQ = {10000, 5000, 2000, 500}, TIER_LIM = {50000, 15000, 5000, 1000};
+    static final String[] TIER_NAME = {"\uD83D\uDC8E Platinum", "\uD83E\uDD47 Gold", "\uD83E\uDD48 Silver", "\uD83E\uDD49 Bronze"};
+
     public oopBC() {
-        setTitle("Philippine National Banco");
+        patchUI();
+        setTitle("Philippine National Banc");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        int w = 540, h = 760;
-        setSize(w, h);
-        setMinimumSize(new Dimension(w, h));
-        setMaximumSize(new Dimension(w, h));
+        setSize(460, 760);
+        setMinimumSize(new Dimension(460, 760));
+        setMaximumSize(new Dimension(460, 760));
         setResizable(false);
         setLocationRelativeTo(null);
-        System.setProperty("awt.useSystemAAFontSettings", "on");
-        System.setProperty("swing.aatext", "true");
         loadData();
-        showMain();
+        showLogin();
         setVisible(true);
     }
 
-    // ════════════════════════════════════════════════════════
-    //  Frames <3
-    // ════════════════════════════════════════════════════════
-    void showMain() {
-        JPanel root = bg();
-        root.setLayout(new BorderLayout());
-        root.add(mkHeader("Philippine National Banco", "Banking Solutions Made Simple", null), BorderLayout.NORTH);
+    static void patchUI() {
+        try {
+            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+        } catch (Exception ignored) {
+        }
+        Border nb = cb(BorderFactory.createLineBorder(BORDER, 1), new EmptyBorder(9, 12, 9, 12));
+        String[] tf = {"TextField", "PasswordField"};
+        for (String k : tf) {
+            UIManager.put(k + ".background", CARD);
+            UIManager.put(k + ".foreground", T1);
+            UIManager.put(k + ".caretForeground", T1);
+            UIManager.put(k + ".selectionBackground", ACCENT);
+            UIManager.put(k + ".selectionForeground", Color.WHITE);
+            UIManager.put(k + ".border", nb);
+            UIManager.put(k + ".font", FB);
+        }
+        UIManager.put("Panel.background", SURFACE);
+        UIManager.put("OptionPane.background", SURFACE);
+        UIManager.put("OptionPane.messageForeground", T1);
+        UIManager.put("Button.background", CARD);
+        UIManager.put("Button.foreground", T1);
+        UIManager.put("Button.border", cb(BorderFactory.createLineBorder(BORDER, 1), new EmptyBorder(6, 16, 6, 16)));
+        UIManager.put("Button.font", FS);
+        UIManager.put("Button.focus", CARD);
+        UIManager.put("Label.foreground", T1);
+        UIManager.put("Label.background", SURFACE);
+        UIManager.put("Label.font", FB);
+        UIManager.put("ScrollBar.background", BG);
+        UIManager.put("ScrollBar.thumb", BORDER);
+        UIManager.put("ScrollBar.thumbShadow", BORDER);
+        UIManager.put("ScrollBar.thumbHighlight", BORDER);
+        UIManager.put("ScrollBar.track", BG);
+    }
 
-        JPanel body = bg();
-        body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
-        body.setBorder(new EmptyBorder(30, 35, 10, 35));
+    static Border cb(Border a, Border b) {
+        return BorderFactory.createCompoundBorder(a, b);
+    }
 
-        body.add(cLabel("Get Started", F_HERO, C_TEXT));
-        body.add(vg(5));
-        body.add(cLabel("Your trusted digital banking partner", F_BODY, C_SUB));
-        body.add(vg(22));
+    static Border focusBorder() {
+        return cb(BorderFactory.createLineBorder(ACCENT, 1), new EmptyBorder(9, 12, 9, 12));
+    }
 
-        JPanel pills = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 0));
-        pills.setOpaque(false);
-        pills.setMaximumSize(new Dimension(460, 34));
-        pills.add(pill("Secure", C_GREEN));
-        pills.add(pill("Instant", C_ACCENT));
-        pills.add(pill("Premium", C_GOLD));
-        body.add(pills);
-        body.add(vg(28));
+    static Border normBorder() {
+        return cb(BorderFactory.createLineBorder(BORDER, 1), new EmptyBorder(9, 12, 9, 12));
+    }
 
-        body.add(btnGrad("Create New Account", e -> showCreateAccount()));
-        body.add(vg(11));
-        body.add(btnGrad("Login to Account", e -> showLogin()));
-        body.add(vg(11));
-        body.add(btnOutline("Currency Exchange", e -> showCurrencyExchange()));
-        body.add(vg(11));
-        body.add(btnGhost("Exit Application", e -> {
+    void showLogin() {
+        JPanel root = new JPanel(new GridBagLayout());
+        root.setBackground(BG);
+        JPanel card = roundCard(360, 510, 18);
+        card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
+        card.setBorder(new EmptyBorder(36, 36, 36, 36));
+
+        JPanel logo = flow(6);
+        logo.setMaximumSize(new Dimension(Integer.MAX_VALUE, 28));
+        logo.add(lbl("\u2B22", new Font("Segoe UI", Font.BOLD, 15), ACCENT));
+        logo.add(lbl("PNB", new Font("Segoe UI", Font.BOLD, 14), T1));
+        card.add(logo);
+        card.add(vsp(22));
+
+        JLabel title = lbl("Sign In", new Font("Segoe UI", Font.BOLD, 22), T1);
+        title.setAlignmentX(CENTER_ALIGNMENT);
+        JLabel sub = lbl("Philippine National Banc", FM, T3);
+        sub.setAlignmentX(CENTER_ALIGNMENT);
+        card.add(title);
+        card.add(vsp(4));
+        card.add(sub);
+        card.add(vsp(26));
+
+        JTextField idF = field();
+        idF.setAlignmentX(CENTER_ALIGNMENT);
+        JPasswordField pwF = pass();
+        pwF.setAlignmentX(CENTER_ALIGNMENT);
+        capRow(card, "ACCOUNT ID");
+        card.add(idF);
+        card.add(vsp(14));
+        capRow(card, "PASSWORD");
+        card.add(pwF);
+        card.add(vsp(6));
+
+        JPanel fp = flow(FlowLayout.RIGHT, 0);
+        fp.setMaximumSize(new Dimension(Integer.MAX_VALUE, 18));
+        JLabel fpL = link("Forgot password?");
+        fpL.addMouseListener(click(e -> showForgotPassword()));
+        fp.add(fpL);
+        card.add(fp);
+        card.add(vsp(22));
+
+        JButton si = btnPrimary("Sign In");
+        si.setAlignmentX(CENTER_ALIGNMENT);
+        si.addActionListener(e -> {
+            String raw = idF.getText().trim();
+            if (raw.isEmpty()) {
+                err("Enter your Account ID.");
+                return;
+            }
+            try {
+                long id = Long.parseLong(raw);
+                int i = findAcc(id);
+                if (i < 0) {
+                    err("Account not found.");
+                    return;
+                }
+                if (!accounts[i].getPassword().equals(new String(pwF.getPassword()))) {
+                    err("Incorrect password.");
+                    return;
+                }
+                loggedIn = i;
+                showDashboard();
+            } catch (NumberFormatException ex) {
+                err("Account ID must be numeric.");
+            }
+        });
+        card.add(si);
+        card.add(vsp(10));
+
+        JButton ca = btnSecondary("Create New Account");
+        ca.setAlignmentX(CENTER_ALIGNMENT);
+        ca.addActionListener(e -> showCreateAccount());
+        card.add(ca);
+        card.add(vsp(20));
+        card.add(divider("or"));
+        card.add(vsp(14));
+
+        JPanel g = flow(FlowLayout.CENTER, 0);
+        g.setMaximumSize(new Dimension(Integer.MAX_VALUE, 18));
+        JLabel gl = link("\u2192  Currency Exchange  (no login required)");
+        gl.addMouseListener(click(e -> showCurrencyExchange()));
+        g.add(gl);
+        card.add(g);
+
+        root.add(card, new GridBagConstraints());
+        JPanel w = new JPanel(new BorderLayout());
+        w.setBackground(BG);
+        w.add(root, BorderLayout.CENTER);
+        w.add(footer(), BorderLayout.SOUTH);
+        swap(w);
+    }
+
+    void showCreateAccount() {
+        JTextField nF = field();
+        JPasswordField pF = pass(), cF = pass();
+        JPanel p = dlg("Create Account", "Fill in the details below");
+        row(p, "FULL NAME", nF);
+        row(p, "PASSWORD", pF);
+        row(p, "CONFIRM PASSWORD", cF);
+        if (!ok(p, "Create Account")) {
+            return;
+        }
+        String name = nF.getText().trim(), pass = new String(pF.getPassword()), conf = new String(cF.getPassword());
+        if (name.isEmpty() || pass.isEmpty()) {
+            err("All fields are required.");
+            return;
+        }
+        if (!pass.equals(conf)) {
+            err("Passwords do not match.");
+            return;
+        }
+        if (pass.length() < 4) {
+            err("Password must be at least 4 characters.");
+            return;
+        }
+        accounts[count++] = new BankAccount(nextId++, name, pass);
+        saveData();
+        msg("Account Created\n\nYour Account ID:  " + (nextId - 1) + "\n\nKeep this ID \u2014 you need it to sign in.");
+    }
+
+    void showForgotPassword() {
+        JTextField iF = field();
+        JPasswordField nF = pass(), cF = pass();
+        JPanel p = dlg("Reset Password", "Enter your Account ID and new password");
+        row(p, "ACCOUNT ID", iF);
+        row(p, "NEW PASSWORD", nF);
+        row(p, "CONFIRM PASSWORD", cF);
+        if (!ok(p, "Reset Password")) {
+            return;
+        }
+        try {
+            int i = findAcc(Long.parseLong(iF.getText().trim()));
+            if (i < 0) {
+                err("Account not found.");
+                return;
+            }
+            String np = new String(nF.getPassword());
+            if (np.length() < 4) {
+                err("Password must be at least 4 characters.");
+                return;
+            }
+            if (!np.equals(new String(cF.getPassword()))) {
+                err("Passwords do not match.");
+                return;
+            }
+            BankAccount u = new BankAccount(accounts[i].getId(), accounts[i].getName(), np);
+            u.copyFrom(accounts[i]);
+            accounts[i] = u;
             saveData();
-            System.exit(0);
-        }));
-        body.add(Box.createVerticalGlue());
-
-        root.add(body, BorderLayout.CENTER);
-        root.add(mkFooter(), BorderLayout.SOUTH);
-        swap(root);
+            msg("Password updated. You can now sign in.");
+        } catch (NumberFormatException ex) {
+            err("Account ID must be numeric.");
+        }
     }
 
     void showDashboard() {
@@ -113,243 +255,222 @@ public class oopBC extends JFrame {
         a.applySavingsInterest();
         a.applyLoanInterest();
 
-        JPanel root = bg();
-        root.setLayout(new BorderLayout());
-        root.add(mkHeader("Welcome back", a.getName(), "Account ID: " + a.getId()), BorderLayout.NORTH);
+        JPanel root = new JPanel(new BorderLayout());
+        root.setBackground(BG);
 
-        JPanel body = bg();
-        body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
-        body.setBorder(new EmptyBorder(22, 26, 16, 16)); 
-
-        // ── Balance :p ─────────────────────────────
-        JPanel balCard = new JPanel(new BorderLayout()) {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setPaint(new GradientPaint(0, 0, C_G1, getWidth(), getHeight(), C_G2));
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 18, 18);
-                g2.dispose();
-            }
-        };
-        balCard.setOpaque(false);
-        balCard.setMaximumSize(new Dimension(490, 118));
-        balCard.setPreferredSize(new Dimension(490, 118));
-        balCard.setMinimumSize(new Dimension(490, 118));
-        balCard.setBorder(new EmptyBorder(18, 22, 18, 22));
-
-        double total = a.getWallet() + a.getSavings() - a.getLoan();
-        JPanel balLeft = new JPanel();
-        balLeft.setOpaque(false);
-        balLeft.setLayout(new BoxLayout(balLeft, BoxLayout.Y_AXIS));
-
-        JLabel balCaption = new JLabel("Total Net Assets");
-        balCaption.setFont(F_SMALL);
-        balCaption.setForeground(new Color(195, 212, 255));
-
-        JLabel balAmt = new JLabel("\u20b1 " + fmtK(total));
-        balAmt.setFont(new Font("Segoe UI", Font.BOLD, 28));
-        balAmt.setForeground(Color.WHITE);
-        int balH = balAmt.getPreferredSize().height;
-        Dimension balSize = new Dimension(260, balH);
-        balAmt.setPreferredSize(balSize);
-        balAmt.setMinimumSize(balSize);
-        balAmt.setMaximumSize(balSize);
-
-        JLabel balDate = new JLabel("Updated " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM d, h:mm a")));
-        balDate.setFont(F_SMALL);
-        balDate.setForeground(new Color(170, 195, 255));
-
-        balLeft.add(balCaption);
-        balLeft.add(Box.createVerticalStrut(6));
-        balLeft.add(balAmt);
-        balLeft.add(Box.createVerticalStrut(4));
-        balLeft.add(balDate);
-
-        JLabel statusChip = mkChip(total >= 0 ? "\u25b2 Healthy" : "\u25bc In Debt", total >= 0 ? C_GREEN : C_RED);
-        balCard.add(balLeft, BorderLayout.WEST);
-        balCard.add(statusChip, BorderLayout.EAST);
-        body.add(balCard);
-        body.add(vg(18));
-
-        // ── 3 stat tiles ──────────────────────────────────
-        JPanel tiles = new JPanel(new GridLayout(1, 3, 12, 0));
-        tiles.setOpaque(false);
-        tiles.setMaximumSize(new Dimension(490, 92));
-        tiles.setPreferredSize(new Dimension(490, 92));
-        tiles.setMinimumSize(new Dimension(490, 92));
-        tiles.add(statTile("\ud83d\udcbc", "Wallet", "\u20b1" + fmt(a.getWallet()), C_ACCENT));
-        tiles.add(statTile("\ud83d\udc37", "Savings", "\u20b1" + fmt(a.getSavings()), C_GREEN));
-        tiles.add(statTile("\ud83d\udcb3", "Loan", "\u20b1" + fmt(a.getLoan()), a.getLoan() > 0 ? C_RED : C_HINT));
-        body.add(tiles);
-        body.add(vg(22));
-
-        // ── Quick Actions :> ──────────────────────
-        JLabel qaLbl = new JLabel("Quick Actions", SwingConstants.CENTER);
-        qaLbl.setFont(F_SUB);
-        qaLbl.setForeground(C_TEXT);
-        qaLbl.setAlignmentX(CENTER_ALIGNMENT);
-        qaLbl.setMaximumSize(new Dimension(490, 22));
-        body.add(qaLbl);
-        body.add(vg(10));
-
-        // ── 2 rows × 4 cols :D ──────────────────────
-        JPanel grid = new JPanel(new GridLayout(2, 4, 10, 10));
-        grid.setOpaque(false);
-        grid.setMaximumSize(new Dimension(490, 126));
-        grid.setPreferredSize(new Dimension(490, 126));
-        grid.setMinimumSize(new Dimension(490, 126));
-        grid.setAlignmentX(CENTER_ALIGNMENT);
-        grid.add(actionTile("\ud83d\udcb0", "Deposit", e -> quickDeposit()));
-        grid.add(actionTile("\ud83c\udfe7", "Withdraw", e -> quickWithdraw()));
-        grid.add(actionTile("\ud83d\udcc8", "Save", e -> showSavings()));
-        grid.add(actionTile("\ud83e\udd1d", "Borrow", e -> showLoan()));
-        grid.add(actionTile("\ud83d\udcca", "Summary", e -> showSummary()));
-        grid.add(actionTile("\ud83d\udcb1", "Exchange", e -> showCurrencyExchange()));
-        grid.add(actionTile("\ud83d\udce4", "Transfer", e -> showTransfer()));
-        grid.add(actionTile("\ud83d\udcdc", "History", e -> showFullHistory()));
-        body.add(grid);
-        body.add(vg(22));
-
-        body.add(btnOutline("\ud83d\udeaa  Logout", e -> {
+        JPanel bar = new JPanel(new BorderLayout());
+        bar.setBackground(SURFACE);
+        bar.setBorder(cb(BorderFactory.createMatteBorder(0, 0, 1, 0, BORDER), new EmptyBorder(12, 22, 12, 22)));
+        JPanel bL = flow(0);
+        bL.setOpaque(false);
+        bL.add(lbl("PNB", FL, ACCENT));
+        bL.add(lbl("   |   ", FB, BORDER));
+        bL.add(lbl(a.getName(), FS, T1));
+        JPanel bR = flow(FlowLayout.RIGHT, 8);
+        bR.setOpaque(false);
+        bR.add(lbl("ID " + a.getId(), FM, T3));
+        JButton out = flatBtn("Sign Out");
+        out.addActionListener(e -> {
             saveData();
             loggedIn = -1;
-            showMain();
-        }));
-        body.add(Box.createVerticalGlue());
+            showLogin();
+        });
+        bR.add(out);
+        bar.add(bL, BorderLayout.WEST);
+        bar.add(bR, BorderLayout.EAST);
+        root.add(bar, BorderLayout.NORTH);
+
+        JPanel body = new JPanel();
+        body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
+        body.setBackground(BG);
+        body.setBorder(new EmptyBorder(18, 18, 28, 18));
+
+        double net = a.getWallet() + a.getSavings() - a.getLoan();
+        body.add(netCard(net));
+        body.add(vsp(10));
+
+        JPanel tiles = new JPanel(new GridLayout(1, 3, 8, 0));
+        tiles.setOpaque(false);
+        tiles.setMaximumSize(new Dimension(Integer.MAX_VALUE, 76));
+        tiles.setPreferredSize(new Dimension(1, 76));
+        tiles.add(statTile("WALLET", a.getWallet(), ACCENT));
+        tiles.add(statTile("SAVINGS", a.getSavings(), GREEN));
+        tiles.add(statTile("LOAN", a.getLoan(), a.getLoan() > 0 ? RED : T3));
+        body.add(tiles);
+        body.add(vsp(22));
+
+        JLabel qa = lbl("QUICK ACTIONS", FL, T3);
+        qa.setAlignmentX(Component.LEFT_ALIGNMENT);
+        body.add(qa);
+        body.add(vsp(10));
+
+        JPanel grid = new JPanel(new GridLayout(2, 4, 8, 8));
+        grid.setOpaque(false);
+        grid.setMaximumSize(new Dimension(Integer.MAX_VALUE, 128));
+        grid.setPreferredSize(new Dimension(1, 128));
+        grid.add(tile("\uD83D\uDCB0", "Deposit", e -> quickDeposit()));
+        grid.add(tile("\uD83C\uDFE7", "Withdraw", e -> quickWithdraw()));
+        grid.add(tile("\uD83D\uDCC8", "Save", e -> showSavings()));
+        grid.add(tile("\uD83E\uDD1D", "Borrow", e -> showLoan()));
+        grid.add(tile("\uD83D\uDCCA", "Summary", e -> showSummary()));
+        grid.add(tile("\uD83D\uDCB1", "Exchange", e -> showCurrencyExchange()));
+        grid.add(tile("\uD83D\uDCE4", "Transfer", e -> showTransfer()));
+        grid.add(tile("\uD83D\uDCDC", "History", e -> showHistory()));
+        body.add(grid);
 
         JScrollPane sp = new JScrollPane(body);
         sp.setBorder(null);
         sp.setOpaque(false);
         sp.getViewport().setOpaque(false);
-        sp.getViewport().setBorder(null);
+        sp.getViewport().setBackground(BG);
         sp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        sp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         sp.getVerticalScrollBar().setUnitIncrement(16);
-        sp.getVerticalScrollBar().setPreferredSize(new Dimension(14, 0));
+        sp.getVerticalScrollBar().setPreferredSize(new Dimension(4, 0));
         root.add(sp, BorderLayout.CENTER);
-        root.add(mkFooter(), BorderLayout.SOUTH);
+        root.add(footer(), BorderLayout.SOUTH);
         swap(root);
     }
 
-    // ════════════════════════════════════════════════════════
-    //  Features for ya (create account, login, curr exchange, deposit, withdraw, transfer)
-    // ════════════════════════════════════════════════════════
-    void showCreateAccount() {
-        JPanel p = dlgPanel("Create New Account", "Join Philippine National Banco today");
-        JTextField nameF = iField("Full Name");
-        JPasswordField passF = pField("Password (min 4 chars)");
-        JPasswordField confF = pField("Confirm Password");
-        addRow(p, "Full Name", nameF);
-        addRow(p, "Password", passF);
-        addRow(p, "Confirm Password", confF);
-
-        if (dlgOk(p, "Create Account")) {
-            String name = nameF.getText().trim();
-            String pass = new String(passF.getPassword());
-            String conf = new String(confF.getPassword());
-            if (name.isEmpty() || pass.isEmpty()) {
-                err("Please fill in all fields.");
-                return;
-            }
-            if (!pass.equals(conf)) {
-                err("Passwords do not match.");
-                return;
-            }
-            if (pass.length() < 4) {
-                err("Password must be at least 4 characters.");
-                return;
-            }
-            accounts[accountCount++] = new BankAccount(nextId++, name, pass);
-            saveData();
-            ok("\u2705  Account created!\n\nYour Account ID:  " + (nextId - 1) + "\n\nSave your ID \u2014 you\u2019ll need it to log in.");
-        }
+    JPanel netCard(double net) {
+        JPanel nc = roundCard(-1, 100, 14);
+        nc.setLayout(new BorderLayout());
+        nc.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
+        nc.setPreferredSize(new Dimension(1, 100));
+        nc.setBorder(new EmptyBorder(16, 20, 16, 20));
+        JPanel L = new JPanel();
+        L.setOpaque(false);
+        L.setLayout(new BoxLayout(L, BoxLayout.Y_AXIS));
+        L.add(lbl("TOTAL NET ASSETS", FL, T3));
+        L.add(vsp(4));
+        L.add(lbl("\u20B1 " + fmtK(net), FG, T1));
+        L.add(vsp(3));
+        L.add(lbl("Updated " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("MMM d, h:mm a")), FM, T3));
+        boolean h = net >= 0;
+        JLabel chip = new JLabel(h ? "  Healthy  " : "  In Debt  ");
+        chip.setFont(FM);
+        chip.setForeground(h ? GREEN : RED);
+        chip.setBorder(BorderFactory.createLineBorder(h ? GREEN : RED, 1));
+        chip.setHorizontalAlignment(SwingConstants.CENTER);
+        nc.add(L, BorderLayout.WEST);
+        nc.add(chip, BorderLayout.EAST);
+        return nc;
     }
 
-    void showLogin() {
-        JPanel p = dlgPanel("Login", "Access your account securely");
-        JTextField idF = iField("Account ID");
-        JPasswordField passF = pField("Password");
-        addRow(p, "Account ID", idF);
-        addRow(p, "Password", passF);
+    JPanel statTile(String label, double val, Color vc) {
+        JPanel t = roundCard(-1, 76, 10);
+        t.setLayout(new BoxLayout(t, BoxLayout.Y_AXIS));
+        t.setBorder(new EmptyBorder(11, 12, 11, 12));
+        t.add(lbl(label, FL, T3));
+        t.add(vsp(5));
+        t.add(lbl("\u20B1 " + fmtK(val), FN, vc));
+        return t;
+    }
 
-        if (dlgOk(p, "Login")) {
-            try {
-                long id = Long.parseLong(idF.getText().trim());
-                int f = -1;
-                for (int i = 0; i < accountCount; i++) {
-                    if (accounts[i].getId() == id) {
-                        f = i;
-                        break;
-                    }
-                }
-                if (f == -1) {
-                    err("Account not found.");
-                    return;
-                }
-                if (!accounts[f].getPassword().equals(new String(passF.getPassword()))) {
-                    err("Incorrect password.");
-                    return;
-                }
-                loggedIn = f;
-                showDashboard();
-            } catch (NumberFormatException ex) {
-                err("Account ID must be a number.");
+    JPanel tile(String emoji, String label, ActionListener al) {
+        JPanel t = roundCard(-1, -1, 10);
+        t.setLayout(new GridBagLayout());
+        t.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        JPanel col = new JPanel();
+        col.setOpaque(false);
+        col.setLayout(new BoxLayout(col, BoxLayout.Y_AXIS));
+        JLabel eL = new JLabel(emoji, SwingConstants.CENTER);
+        eL.setFont(FEM);
+        eL.setAlignmentX(CENTER_ALIGNMENT);
+        JLabel tL = new JLabel(label, SwingConstants.CENTER);
+        tL.setFont(FM);
+        tL.setForeground(T2);
+        tL.setAlignmentX(CENTER_ALIGNMENT);
+        col.add(eL);
+        col.add(vsp(4));
+        col.add(tL);
+        t.add(col, new GridBagConstraints());
+        t.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                t.setBackground(HOVER);
+                t.repaint();
             }
-        }
+
+            public void mouseExited(MouseEvent e) {
+                t.setBackground(CARD);
+                t.repaint();
+            }
+
+            public void mouseClicked(MouseEvent e) {
+                al.actionPerformed(new ActionEvent(t, 0, ""));
+            }
+        });
+        return t;
     }
 
     void quickDeposit() {
-        String s = askAmt("Deposit to Wallet", "Add money to your wallet", "Amount (\u20b1)");
+        String s = askAmt("Deposit", "Amount to deposit into wallet");
         if (s == null) {
             return;
         }
-        double a = safeD(s);
+        double a = parseAmt(s);
         if (a <= 0) {
             return;
         }
         accounts[loggedIn].depositWallet(a);
-        accounts[loggedIn].addTx("\u2b06  \u20b1" + fmt(a) + "  \u2014  Wallet Deposit");
+        accounts[loggedIn].addTx("\u2B06 \u20B1" + fmt(a) + " \u2014 Deposit");
         saveData();
-        ok("Deposited \u20b1" + fmt(a) + " to wallet.");
+        msg("Deposited \u20B1" + fmt(a) + ".");
         showDashboard();
     }
 
     void quickWithdraw() {
-        String s = askAmt("Withdraw from Wallet", "Cash out from your wallet", "Amount (\u20b1)");
+        String s = askAmt("Withdraw", "Amount to withdraw from wallet");
         if (s == null) {
             return;
         }
-        double a = safeD(s);
+        double a = parseAmt(s);
         if (a <= 0) {
             return;
         }
         if (a > accounts[loggedIn].getWallet()) {
-            err("Insufficient wallet balance.");
+            err("Insufficient balance.");
             return;
         }
         accounts[loggedIn].withdrawWallet(a);
-        accounts[loggedIn].addTx("\u2b07  \u20b1" + fmt(a) + "  \u2014  Wallet Withdrawal");
+        accounts[loggedIn].addTx("\u2B07 \u20B1" + fmt(a) + " \u2014 Withdrawal");
         saveData();
-        ok("Withdrew \u20b1" + fmt(a) + " from wallet.");
+        msg("Withdrew \u20B1" + fmt(a) + ".");
         showDashboard();
     }
 
     void showSavings() {
         accounts[loggedIn].applySavingsInterest();
         BankAccount a = accounts[loggedIn];
-        String[] opts = {"Deposit to Savings", "Withdraw from Savings", "Cancel"};
-        int ch = JOptionPane.showOptionDialog(this,
-                "Savings Balance: \u20b1" + fmt(a.getSavings())
-                + "\nWallet Balance:  \u20b1" + fmt(a.getWallet())
-                + "\n\n\ud83d\udcc8 Earns 1% interest per day",
-                "\ud83d\udc37 Savings Account", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, opts, opts[2]);
-        if (ch == 0) {
-            String s = askAmt("Save Money", "Transfer wallet \u2192 savings", "Amount (\u20b1)");
+        JPanel p = dlg("Savings Account", "1% interest per day");
+        p.add(infoGrid(new String[]{"Savings", "Wallet"},
+                new String[]{"\u20B1 " + fmt(a.getSavings()), "\u20B1 " + fmt(a.getWallet())},
+                new Color[]{GREEN, ACCENT}));
+        p.add(vsp(14));
+        int[] pick = {-1};
+        JDialog[] ref = {null};
+        JButton d = optBtn("Deposit to Savings", GREEN), w = optBtn("Withdraw from Savings", ACCENT), c = optBtn("Cancel", T3);
+        d.addActionListener(e -> {
+            pick[0] = 0;
+            ref[0].dispose();
+        });
+        w.addActionListener(e -> {
+            pick[0] = 1;
+            ref[0].dispose();
+        });
+        c.addActionListener(e -> ref[0].dispose());
+        p.add(d);
+        p.add(vsp(8));
+        p.add(w);
+        p.add(vsp(8));
+        p.add(c);
+        ref[0] = mkDlg(p, "Savings");
+        ref[0].setVisible(true);
+        if (pick[0] == 0) {
+            String s = askAmt("Deposit to Savings", "Move from wallet to savings");
             if (s == null) {
                 return;
             }
-            double amt = safeD(s);
+            double amt = parseAmt(s);
             if (amt <= 0) {
                 return;
             }
@@ -358,64 +479,131 @@ public class oopBC extends JFrame {
                 return;
             }
             a.depositSavings(amt);
-            a.addTx("\u2192  \u20b1" + fmt(amt) + "  \u2014  Moved to Savings");
+            a.addTx("\u2192 \u20B1" + fmt(amt) + " \u2014 To Savings");
             saveData();
-            ok("\u20b1" + fmt(amt) + " moved to savings.\nEarning 1% daily interest! \ud83d\udcc8");
+            msg("\u20B1" + fmt(amt) + " moved to savings.");
             showDashboard();
-        } else if (ch == 1) {
-            String s = askAmt("Savings Withdrawal", "Transfer savings \u2192 wallet", "Amount (\u20b1)");
+        } else if (pick[0] == 1) {
+            String s = askAmt("Withdraw from Savings", "Move back to wallet");
             if (s == null) {
                 return;
             }
-            double amt = safeD(s);
+            double amt = parseAmt(s);
             if (amt <= 0) {
                 return;
             }
             if (amt > a.getSavings()) {
-                err("Insufficient savings balance.");
+                err("Insufficient savings.");
                 return;
             }
             a.withdrawSavings(amt);
-            a.addTx("\u2190  \u20b1" + fmt(amt) + "  \u2014  Savings Withdrawal");
+            a.addTx("\u2190 \u20B1" + fmt(amt) + " \u2014 From Savings");
             saveData();
-            ok("\u20b1" + fmt(amt) + " transferred back to wallet.");
+            msg("\u20B1" + fmt(amt) + " moved to wallet.");
             showDashboard();
         }
+    }
+
+    String tierName(double b) {
+        for (int i = 0; i < TIER_REQ.length; i++) {
+            if (b >= TIER_REQ[i]) {
+                return TIER_NAME[i];
+
+            }
+        }
+        return "None";
+    }
+
+    double tierLim(double b) {
+        for (int i = 0; i < TIER_REQ.length; i++) {
+            if (b >= TIER_REQ[i]) {
+                return TIER_LIM[i];
+
+            }
+        }
+        return 0;
     }
 
     void showLoan() {
         accounts[loggedIn].applyLoanInterest();
         BankAccount a = accounts[loggedIn];
-        String[] opts = {"Borrow Money", "Repay Loan", "Cancel"};
-        int ch = JOptionPane.showOptionDialog(this,
-                "Outstanding Loan: \u20b1" + fmt(a.getLoan())
-                + "\nWallet Balance:   \u20b1" + fmt(a.getWallet())
-                + "\n\n\u26a0  5% interest accrues per day",
-                "\ud83d\udcb3 Loan Management", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, opts, opts[2]);
-        if (ch == 0) {
-            String s = askAmt("Borrow a Loan", "Funds credited to wallet immediately", "Loan Amount (\u20b1)");
+        double bal = a.getWallet() + a.getSavings();
+        if (bal < LOAN_MIN) {
+            JPanel p = dlg("Loan Unavailable", "Minimum \u20B1" + fmt(LOAN_MIN) + " total balance required");
+            String[] ln = new String[4];
+            String[] lv = new String[4];
+            Color[] lc = new Color[4];
+            for (int i = 0; i < 4; i++) {
+                ln[i] = TIER_NAME[i];
+                lv[i] = "\u20B1" + fmt(TIER_REQ[i]) + " \u2192 \u20B1" + fmt(TIER_LIM[i]);
+                lc[i] = GOLD;
+            }
+            p.add(infoGrid(ln, lv, lc));
+            mkDlg(p, "Loan Tiers").setVisible(true);
+            return;
+        }
+        double lim = tierLim(bal);
+        String tier = tierName(bal);
+        JPanel p = dlg("Loan Management", tier + " \u00B7 Max \u20B1" + fmt(lim));
+        p.add(infoGrid(new String[]{"Wallet", "Loan"},
+                new String[]{"\u20B1 " + fmt(a.getWallet()), "\u20B1 " + fmt(a.getLoan())},
+                new Color[]{ACCENT, a.getLoan() > 0 ? RED : T3}));
+        p.add(vsp(6));
+        JLabel wi = lbl("5% daily interest on outstanding loans", FM, RED);
+        wi.setAlignmentX(CENTER_ALIGNMENT);
+        p.add(wi);
+        p.add(vsp(14));
+        int[] pick = {-1};
+        JDialog[] ref = {null};
+        JButton b = optBtn("Borrow Money", GREEN), r = optBtn("Repay Loan", ACCENT), c = optBtn("Cancel", T3);
+        b.addActionListener(e -> {
+            pick[0] = 0;
+            ref[0].dispose();
+        });
+        r.addActionListener(e -> {
+            pick[0] = 1;
+            ref[0].dispose();
+        });
+        c.addActionListener(e -> ref[0].dispose());
+        p.add(b);
+        p.add(vsp(8));
+        p.add(r);
+        p.add(vsp(8));
+        p.add(c);
+        ref[0] = mkDlg(p, "Loan");
+        ref[0].setVisible(true);
+        if (pick[0] == 0) {
+            String s = askAmt("Borrow", "Max \u20B1" + fmt(lim) + " | 5% daily interest");
             if (s == null) {
                 return;
             }
-            double amt = safeD(s);
+            double amt = parseAmt(s);
             if (amt <= 0) {
                 return;
             }
-            a.borrowLoan(amt);
-            a.addTx("\ud83d\udcb3 \u20b1" + fmt(amt) + "  \u2014  Loan Disbursed");
-            saveData();
-            ok("\u20b1" + fmt(amt) + " loan approved!\n\n\u26a0 5% daily interest applies.\nRepay promptly to avoid high charges.");
-            showDashboard();
-        } else if (ch == 1) {
-            if (a.getLoan() <= 0) {
-                ok("\ud83c\udf89 You have no outstanding loan!");
+            if (amt > lim) {
+                err("Exceeds tier limit of \u20B1" + fmt(lim));
                 return;
             }
-            String s = askAmt("Repay Loan", "Payment deducted from wallet", "Payment Amount (\u20b1)");
+            if (a.getLoan() + amt > lim) {
+                err("Would exceed limit. Current: \u20B1" + fmt(a.getLoan()));
+                return;
+            }
+            a.borrowLoan(amt);
+            a.addTx("\uD83D\uDCB3 \u20B1" + fmt(amt) + " \u2014 Loan (" + tier + ")");
+            saveData();
+            msg("Loan of \u20B1" + fmt(amt) + " approved.");
+            showDashboard();
+        } else if (pick[0] == 1) {
+            if (a.getLoan() <= 0) {
+                msg("No outstanding loan.");
+                return;
+            }
+            String s = askAmt("Repay Loan", "Payment deducted from wallet");
             if (s == null) {
                 return;
             }
-            double amt = safeD(s);
+            double amt = parseAmt(s);
             if (amt <= 0) {
                 return;
             }
@@ -424,9 +612,9 @@ public class oopBC extends JFrame {
                 return;
             }
             a.payLoan(amt);
-            a.addTx("\u2713  \u20b1" + fmt(amt) + "  \u2014  Loan Repayment");
+            a.addTx("\u2713 \u20B1" + fmt(amt) + " \u2014 Loan Payment");
             saveData();
-            ok("\u20b1" + fmt(amt) + " loan payment applied!");
+            msg("Payment of \u20B1" + fmt(amt) + " applied.");
             showDashboard();
         }
     }
@@ -435,655 +623,459 @@ public class oopBC extends JFrame {
         accounts[loggedIn].applySavingsInterest();
         accounts[loggedIn].applyLoanInterest();
         BankAccount a = accounts[loggedIn];
-        double total = a.getWallet() + a.getSavings() - a.getLoan();
-
-        JPanel p = new JPanel();
-        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
-        p.setBackground(Color.WHITE);
-        p.setBorder(new EmptyBorder(10, 6, 10, 6));
-        p.setPreferredSize(new Dimension(320, 260));
-
-        p.add(cLabel("Account Summary", F_TITLE, C_TEXT));
-        p.add(vg(3));
-        p.add(cLabel(a.getName() + "  \u00b7  ID " + a.getId(), F_LBL, C_SUB));
-        p.add(vg(20));
-        p.add(sumRow("\ud83d\udcbc  Wallet", "\u20b1 " + fmt(a.getWallet()), C_ACCENT));
-        p.add(vg(8));
-        p.add(sumRow("\ud83d\udc37  Savings", "\u20b1 " + fmt(a.getSavings()), C_GREEN));
-        p.add(vg(8));
-        p.add(sumRow("\ud83d\udcb3  Loan Balance", "\u20b1 " + fmt(a.getLoan()), a.getLoan() > 0 ? C_RED : C_HINT));
-        p.add(vg(16));
-        JSeparator sep = new JSeparator();
-        sep.setForeground(C_IBRD);
-        sep.setMaximumSize(new Dimension(320, 1));
-        sep.setAlignmentX(LEFT_ALIGNMENT);
-        p.add(sep);
-        p.add(vg(14));
-        p.add(sumRow("\ud83d\udcca  Net Assets", "\u20b1 " + fmt(total), total >= 0 ? C_GREEN : C_RED));
-
-        JOptionPane.showMessageDialog(this, p, "\ud83d\udcca Account Summary", JOptionPane.PLAIN_MESSAGE);
+        double net = a.getWallet() + a.getSavings() - a.getLoan();
+        JPanel p = dlg("Account Summary", a.getName() + " \u00B7 ID " + a.getId());
+        p.add(sumRow("Wallet", "\u20B1 " + fmt(a.getWallet()), ACCENT));
+        p.add(vsp(10));
+        p.add(sumRow("Savings", "\u20B1 " + fmt(a.getSavings()), GREEN));
+        p.add(vsp(10));
+        p.add(sumRow("Loan", "\u20B1 " + fmt(a.getLoan()), a.getLoan() > 0 ? RED : T3));
+        p.add(vsp(14));
+        p.add(hr());
+        p.add(vsp(12));
+        p.add(sumRow("Net Assets", "\u20B1 " + fmt(net), net >= 0 ? GREEN : RED));
+        mkDlg(p, "Summary").setVisible(true);
     }
 
     void showCurrencyExchange() {
-        String[] opts = {
-            "\u20b1 \u2192 $  Peso \u2192 Dollar", "$ \u2192 \u20b1  Dollar \u2192 Peso",
-            "\u20ac \u2192 $  Euro \u2192 Dollar", "\u20ac \u2192 \u20b1  Euro \u2192 Peso",
-            "$ \u2192 \u20ac  Dollar \u2192 Euro", "\u00a5 \u2192 \u20b1  Yen \u2192 Peso"
-        };
-        int ch = JOptionPane.showOptionDialog(this,
-                "Rates: $1=\u20b156  |  \u20ac1=\u20b160  |  \u20ac1=$1.08  |  \u00a51=\u20b10.38",
-                "\ud83d\udcb1 Currency Exchange",
-                JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, opts, opts[0]);
-        if (ch == -1) {
+        String[] opts = {"\u20B1 Peso \u2192 Dollar $", "$ Dollar \u2192 Peso \u20B1",
+            "\u20AC Euro \u2192 Dollar $", "\u20AC Euro \u2192 Peso \u20B1",
+            "$ Dollar \u2192 Euro \u20AC", "\u00A5 Yen \u2192 Peso \u20B1"};
+        JPanel p = dlg("Currency Exchange", "$1=\u20B156 \u00B7 \u20AC1=\u20B160 \u00B7 \u20AC1=$1.08 \u00B7 \u00A51=\u20B10.38");
+        int[] pick = {-1};
+        JDialog[] ref = {null};
+        for (int i = 0; i < opts.length; i++) {
+            final int idx = i;
+            JButton b = optBtn(opts[i], ACCENT);
+            b.addActionListener(e -> {
+                pick[0] = idx;
+                ref[0].dispose();
+            });
+            p.add(b);
+            p.add(vsp(7));
+        }
+        JButton cx = optBtn("Cancel", T3);
+        cx.addActionListener(e -> ref[0].dispose());
+        p.add(cx);
+        ref[0] = mkDlg(p, "Exchange");
+        ref[0].setVisible(true);
+        if (pick[0] < 0) {
             return;
         }
-        String s = askAmt("Currency Exchange", opts[ch], "Amount");
+        String s = askAmt("Currency Exchange", opts[pick[0]]);
         if (s == null) {
             return;
         }
-        double a = safeD(s);
+        double a = parseAmt(s);
         if (a <= 0) {
             return;
         }
-        String result = switch (ch) {
-            case 0 ->
-                "\u20b1" + fmt(a) + " = $" + fmt(a / 56.0);
-            case 1 ->
-                "$" + fmt(a) + " = \u20b1" + fmt(a * 56.0);
-            case 2 ->
-                "\u20ac" + fmt(a) + " = $" + fmt(a * 1.08);
-            case 3 ->
-                "\u20ac" + fmt(a) + " = \u20b1" + fmt(a * 60.0);
-            case 4 ->
-                "$" + fmt(a) + " = \u20ac" + fmt(a / 1.08);
-            case 5 ->
-                "\u00a5" + fmt(a) + " = \u20b1" + fmt(a * 0.38);
-            default ->
-                "";
-        };
-        ok("\ud83d\udcb1 Result\n\n" + result + "\n\n(Approximate market rates)");
+        String[] res = {"\u20B1" + fmt(a) + " = $" + fmt(a / 56), "$" + fmt(a) + " = \u20B1" + fmt(a * 56),
+            "\u20AC" + fmt(a) + " = $" + fmt(a * 1.08), "\u20AC" + fmt(a) + " = \u20B1" + fmt(a * 60),
+            "$" + fmt(a) + " = \u20AC" + fmt(a / 1.08), "\u00A5" + fmt(a) + " = \u20B1" + fmt(a * 0.38)};
+        msg("Result\n\n" + res[pick[0]] + "\n\n(Approximate rates)");
     }
 
     void showTransfer() {
-        BankAccount sender = accounts[loggedIn];
-
-        JPanel p = new JPanel();
-        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
-        p.setBackground(Color.WHITE);
-        p.setBorder(new EmptyBorder(8, 4, 8, 4));
-
-        JLabel title = new JLabel("Transfer Funds", SwingConstants.CENTER);
-        title.setFont(F_TITLE);
-        title.setForeground(C_TEXT);
-        title.setAlignmentX(CENTER_ALIGNMENT);
-        JLabel sub = new JLabel("Send money to another PNB account", SwingConstants.CENTER);
-        sub.setFont(F_LBL);
-        sub.setForeground(C_SUB);
-        sub.setAlignmentX(CENTER_ALIGNMENT);
-        p.add(title);
-        p.add(Box.createVerticalStrut(3));
-        p.add(sub);
-        p.add(Box.createVerticalStrut(14));
-
-        JPanel infoBar = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
-        infoBar.setBackground(C_IBG);
-        infoBar.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(C_IBRD, 1),
-                new EmptyBorder(8, 14, 8, 14)));
-        infoBar.setMaximumSize(new Dimension(340, 38));
-        infoBar.setAlignmentX(CENTER_ALIGNMENT);
-        JLabel balInfo = new JLabel("Your wallet:  \u20b1" + fmt(sender.getWallet()));
-        balInfo.setFont(F_BTN);
-        balInfo.setForeground(C_ACCENT);
-        infoBar.add(balInfo);
-        p.add(infoBar);
-        p.add(Box.createVerticalStrut(14));
-
-        JTextField recipientIdF = iField("Recipient Account ID");
-        JTextField amountF = iField("Amount (\u20b1)");
-        JTextField noteF = iField("Note (optional)");
-
-        addRow(p, "Recipient Account ID", recipientIdF);
-        addRow(p, "Amount (\u20b1)", amountF);
-        addRow(p, "Note (optional)", noteF);
-
-        int res = JOptionPane.showConfirmDialog(this, p, "\ud83d\udce4 Transfer Funds",
-                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-        if (res != JOptionPane.OK_OPTION) {
+        BankAccount snd = accounts[loggedIn];
+        JTextField toId = field(), toAmt = field(), toNote = field();
+        JPanel p = dlg("Transfer Funds", "Available: \u20B1" + fmt(snd.getWallet()));
+        row(p, "RECIPIENT ACCOUNT ID", toId);
+        row(p, "AMOUNT (\u20B1)", toAmt);
+        row(p, "NOTE (OPTIONAL)", toNote);
+        if (!ok(p, "Transfer")) {
             return;
         }
-
-        long recipientId;
+        long rid;
         try {
-            recipientId = Long.parseLong(recipientIdF.getText().trim());
+            rid = Long.parseLong(toId.getText().trim());
         } catch (NumberFormatException ex) {
-            err("Recipient ID must be a valid number.");
+            err("Recipient ID must be numeric.");
             return;
         }
-
-        if (recipientId == sender.getId()) {
-            err("You cannot transfer funds to yourself.");
+        if (rid == snd.getId()) {
+            err("Cannot transfer to yourself.");
             return;
         }
-
-        int recipientIdx = -1;
-        for (int i = 0; i < accountCount; i++) {
-            if (accounts[i].getId() == recipientId) {
-                recipientIdx = i;
-                break;
-            }
-        }
-        if (recipientIdx == -1) {
-            err("Recipient account ID " + recipientId + " was not found.");
+        int ri = findAcc(rid);
+        if (ri < 0) {
+            err("Account #" + rid + " not found.");
             return;
         }
-
-        double amt = safeD(amountF.getText().trim());
-        if (amt <= 0) {
+        double a = parseAmt(toAmt.getText().trim());
+        if (a <= 0) {
             return;
         }
-        if (amt > sender.getWallet()) {
-            err("Insufficient wallet balance.\n\nWallet:    \u20b1" + fmt(sender.getWallet())
-                    + "\nRequested: \u20b1" + fmt(amt));
+        if (a > snd.getWallet()) {
+            err("Insufficient balance.");
             return;
         }
-
-        BankAccount recipient = accounts[recipientIdx];
-        String note = noteF.getText().trim().isEmpty() ? "No note" : noteF.getText().trim();
-
-        JPanel confirm = new JPanel();
-        confirm.setLayout(new BoxLayout(confirm, BoxLayout.Y_AXIS));
-        confirm.setBackground(Color.WHITE);
-        confirm.setBorder(new EmptyBorder(10, 6, 10, 6));
-        confirm.setPreferredSize(new Dimension(340, 270));
-
-        JLabel ct = new JLabel("Confirm Transfer", SwingConstants.CENTER);
-        ct.setFont(F_TITLE);
-        ct.setForeground(C_TEXT);
-        ct.setAlignmentX(CENTER_ALIGNMENT);
-        confirm.add(ct);
-        confirm.add(Box.createVerticalStrut(16));
-        confirm.add(sumRow("From", sender.getName() + " (#" + sender.getId() + ")", C_TEXT));
-        confirm.add(Box.createVerticalStrut(8));
-        confirm.add(sumRow("To", recipient.getName() + " (#" + recipient.getId() + ")", C_ACCENT));
-        confirm.add(Box.createVerticalStrut(8));
-        confirm.add(sumRow("Amount", "\u20b1 " + fmt(amt), C_GREEN));
-        confirm.add(Box.createVerticalStrut(8));
-        confirm.add(sumRow("Note", note, C_SUB));
-        confirm.add(Box.createVerticalStrut(14));
-        JSeparator csep = new JSeparator();
-        csep.setForeground(C_IBRD);
-        csep.setMaximumSize(new Dimension(340, 1));
-        csep.setAlignmentX(LEFT_ALIGNMENT);
-        confirm.add(csep);
-        confirm.add(Box.createVerticalStrut(12));
-        double afterBalance = sender.getWallet() - amt;
-        confirm.add(sumRow("Balance after", "\u20b1 " + fmt(afterBalance), afterBalance >= 0 ? C_TEXT : C_RED));
-
-        int conf = JOptionPane.showConfirmDialog(this, confirm, "Confirm Transfer",
-                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-        if (conf != JOptionPane.OK_OPTION) {
+        BankAccount rcv = accounts[ri];
+        String note = toNote.getText().trim().isEmpty() ? "No note" : toNote.getText().trim();
+        JPanel cp = dlg("Confirm Transfer", "Review before proceeding");
+        cp.add(sumRow("From", snd.getName() + " (#" + snd.getId() + ")", T1));
+        cp.add(vsp(8));
+        cp.add(sumRow("To", rcv.getName() + " (#" + rcv.getId() + ")", ACCENT));
+        cp.add(vsp(8));
+        cp.add(sumRow("Amount", "\u20B1 " + fmt(a), GREEN));
+        cp.add(vsp(8));
+        cp.add(sumRow("Note", note, T2));
+        cp.add(vsp(14));
+        cp.add(hr());
+        cp.add(vsp(12));
+        double after = snd.getWallet() - a;
+        cp.add(sumRow("Balance After", "\u20B1 " + fmt(after), after >= 0 ? T1 : RED));
+        if (!ok(cp, "Confirm Transfer")) {
             return;
         }
-
-        sender.withdrawWallet(amt);
-        recipient.depositWallet(amt);
-
-        String noteTag = note.equals("No note") ? "" : "  \u201c" + note + "\u201d";
-        sender.addTx("\ud83d\udce4 \u20b1" + fmt(amt) + "  \u2014  Sent to " + recipient.getName() + noteTag);
-        recipient.addTx("\ud83d\udce5 \u20b1" + fmt(amt) + "  \u2014  From " + sender.getName() + noteTag);
-
+        snd.withdrawWallet(a);
+        rcv.depositWallet(a);
+        String nt = note.equals("No note") ? "" : " \u201C" + note + "\u201D";
+        snd.addTx("\uD83D\uDCE4 \u20B1" + fmt(a) + " \u2014 To " + rcv.getName() + nt);
+        rcv.addTx("\uD83D\uDCE5 \u20B1" + fmt(a) + " \u2014 From " + snd.getName() + nt);
         saveData();
-        ok("\u2705 Transfer Successful!\n\n"
-                + "\u20b1" + fmt(amt) + " sent to " + recipient.getName()
-                + "\nAccount #" + recipient.getId()
-                + "\n\nYour new wallet balance:  \u20b1" + fmt(sender.getWallet()));
+        msg("Transfer complete.\n\u20B1" + fmt(a) + " sent to " + rcv.getName());
         showDashboard();
     }
 
-    void showFullHistory() {
+    void showHistory() {
         BankAccount a = accounts[loggedIn];
         String[] txs = a.getLastTransactions();
-
-        JPanel p = new JPanel();
-        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
-        p.setBackground(Color.WHITE);
-        p.setBorder(new EmptyBorder(10, 6, 10, 6));
-        p.setPreferredSize(new Dimension(380, txs.length == 0 ? 110 : Math.min(60 + txs.length * 46, 340)));
-
-        JLabel t = new JLabel("Transaction History", SwingConstants.CENTER);
-        t.setFont(F_TITLE);
-        t.setForeground(C_TEXT);
-        t.setAlignmentX(CENTER_ALIGNMENT);
-        JLabel s = new JLabel(a.getName() + "  \u00b7  Last " + txs.length + " transactions", SwingConstants.CENTER);
-        s.setFont(F_LBL);
-        s.setForeground(C_SUB);
-        s.setAlignmentX(CENTER_ALIGNMENT);
-        p.add(t);
-        p.add(Box.createVerticalStrut(4));
-        p.add(s);
-        p.add(Box.createVerticalStrut(16));
-
+        JPanel p = dlg("Transaction History", a.getName() + " \u00B7 Last " + txs.length + " entries");
         if (txs.length == 0) {
-            JLabel empty = new JLabel("No transactions yet.", SwingConstants.CENTER);
-            empty.setFont(F_BODY);
-            empty.setForeground(C_HINT);
-            empty.setAlignmentX(CENTER_ALIGNMENT);
-            p.add(empty);
+            JLabel el = lbl("No transactions yet.", FB, T3);
+            el.setAlignmentX(CENTER_ALIGNMENT);
+            p.add(el);
         } else {
             for (int i = 0; i < txs.length; i++) {
                 String tx = txs[i];
-                Color rowColor = C_TEXT;
-                if (tx.contains("Deposit") || tx.contains("Savings") && tx.contains("\u2192") || tx.contains("From ")) {
-                    rowColor = C_GREEN;
-                } else if (tx.contains("Withdrawal") || tx.contains("Sent to")) {
-                    rowColor = C_RED;
-                } else if (tx.contains("Loan Disbursed")) {
-                    rowColor = C_GOLD;
-                } else if (tx.contains("Repayment")) {
-                    rowColor = C_ACCENT;
+                Color c = T2;
+                if (tx.contains("Deposit") || tx.contains("\u2192") || tx.contains("From ")) {
+                    c = GREEN;
+                } else if (tx.contains("Withdrawal") || tx.contains("To ")) {
+                    c = RED;
+                } else if (tx.contains("Loan (")) {
+                    c = GOLD;
+                } else if (tx.contains("Payment")) {
+                    c = ACCENT;
                 }
-
-                JPanel row = new JPanel(new BorderLayout());
-                row.setBackground(i % 2 == 0 ? Color.WHITE : C_IBG);
-                row.setMaximumSize(new Dimension(370, 38));
-                row.setBorder(new EmptyBorder(8, 10, 8, 10));
-                JLabel lbl = new JLabel(tx);
-                lbl.setFont(F_BODY);
-                lbl.setForeground(rowColor);
-                row.add(lbl, BorderLayout.CENTER);
-                p.add(row);
+                JPanel r = new JPanel(new BorderLayout());
+                r.setBackground(i % 2 == 0 ? CARD : HOVER);
+                r.setBorder(new EmptyBorder(10, 12, 10, 12));
+                r.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
+                r.add(lbl(tx, FB, c));
+                p.add(r);
                 if (i < txs.length - 1) {
-                    JSeparator sep = new JSeparator();
-                    sep.setForeground(C_IBRD);
-                    sep.setMaximumSize(new Dimension(370, 1));
-                    p.add(sep);
+                    p.add(hr());
                 }
             }
         }
-        JOptionPane.showMessageDialog(this, p, "\ud83d\udcdc Transaction History", JOptionPane.PLAIN_MESSAGE);
+        mkDlg(p, "History").setVisible(true);
     }
 
-    // ════════════════════════════════════════════════════════
-    //  ui buildersssssss
-    // ════════════════════════════════════════════════════════
-    JPanel mkHeader(String l1, String l2, String l3) {
-        JPanel outer = new JPanel() {
-            @Override
+    JPanel roundCard(int w, int h, int r) {
+        JPanel p = new JPanel() {
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setPaint(new GradientPaint(0, 0, C_G1, getWidth(), getHeight(), C_G2));
-                g2.fillRect(0, 0, getWidth(), getHeight());
-                g2.setColor(new Color(255, 255, 255, 12));
-                g2.fillOval(getWidth() - 80, -30, 130, 130);
-                g2.fillOval(getWidth() - 150, 40, 80, 80);
+                g2.setColor(CARD);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), r, r);
+                g2.setColor(BORDER);
+                g2.setStroke(new BasicStroke(1f));
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, r, r);
                 g2.dispose();
             }
         };
-        outer.setOpaque(true);
-        int h = (l3 != null) ? 128 : 105;
-        outer.setPreferredSize(new Dimension(540, h));
-        outer.setMinimumSize(new Dimension(540, h));
-        outer.setMaximumSize(new Dimension(540, h));
-        outer.setLayout(new BorderLayout());
-        outer.setBorder(new EmptyBorder(16, 24, 16, 24));
-
-        JPanel inner = new JPanel();
-        inner.setOpaque(false);
-        inner.setLayout(new BoxLayout(inner, BoxLayout.Y_AXIS));
-
-        JLabel logo = new JLabel("\u2b21  PNB");
-        logo.setFont(new Font("Segoe UI", Font.BOLD, 15));
-        logo.setForeground(new Color(190, 215, 255));
-
-        JLabel lb1 = new JLabel(l1);
-        lb1.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lb1.setForeground(new Color(178, 202, 255));
-
-        JLabel lb2 = new JLabel(l2);
-        lb2.setFont(new Font("Segoe UI", Font.BOLD, 21));
-        lb2.setForeground(Color.WHITE);
-
-        inner.add(logo);
-        inner.add(Box.createVerticalStrut(8));
-        inner.add(lb1);
-        inner.add(Box.createVerticalStrut(2));
-        inner.add(lb2);
-
-        if (l3 != null) {
-            inner.add(Box.createVerticalStrut(4));
-            JLabel lb3 = new JLabel(l3);
-            lb3.setFont(F_MONO);
-            lb3.setForeground(new Color(155, 188, 255));
-            inner.add(lb3);
+        p.setOpaque(false);
+        p.setBackground(CARD);
+        if (w > 0 && h > 0) {
+            p.setPreferredSize(new Dimension(w, h));
         }
-
-        outer.add(inner, BorderLayout.CENTER);
-        return outer;
-    }
-
-    JPanel card() {
-        JPanel p = new JPanel();
-        p.setBackground(C_CARD);
-        p.setOpaque(true);
-        p.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(210, 220, 242), 1),
-                BorderFactory.createMatteBorder(0, 0, 3, 0, new Color(190, 205, 238, 90))
-        ));
         return p;
     }
 
-    JPanel statTile(String icon, String label, String val, Color vc) {
-        JPanel t = card();
-        t.setLayout(new BoxLayout(t, BoxLayout.Y_AXIS));
-        t.setBorder(new EmptyBorder(13, 13, 11, 13));
-        JLabel ic = new JLabel(icon);
-        ic.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 22));
-        JLabel vl = new JLabel(val);
-        vl.setFont(F_NUM);
-        vl.setForeground(vc);
-        Dimension vSize = new Dimension(120, vl.getPreferredSize().height);
-        vl.setPreferredSize(vSize);
-        vl.setMinimumSize(vSize);
-        vl.setMaximumSize(vSize);
-        JLabel lb = new JLabel(label);
-        lb.setFont(F_SMALL);
-        lb.setForeground(C_SUB);
-        t.add(ic);
-        t.add(Box.createVerticalStrut(5));
-        t.add(vl);
-        t.add(Box.createVerticalStrut(2));
-        t.add(lb);
-        return t;
-    }
-
-    JButton actionTile(String icon, String label, ActionListener al) {
-        JButton btn = new JButton("<html><center>" + icon + "<br><small>" + label + "</small></center></html>") {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(getModel().isPressed() ? new Color(228, 234, 252) : C_CARD);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
-                g2.setColor(new Color(208, 218, 242));
-                g2.setStroke(new BasicStroke(1f));
-                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 12, 12);
-                g2.dispose();
-                super.paintComponent(g);
+    JTextField field() {
+        JTextField f = new JTextField();
+        f.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
+        f.setPreferredSize(new Dimension(380, 42));
+        f.addFocusListener(new FocusAdapter() {
+            public void focusGained(FocusEvent e) {
+                f.setBorder(focusBorder());
             }
-        };
-        btn.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 20));
-        btn.setForeground(C_TEXT);
-        btn.setFocusPainted(false);
-        btn.setBorderPainted(false);
-        btn.setContentAreaFilled(false);
-        btn.setOpaque(false);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.addActionListener(al);
-        return btn;
-    }
 
-    JButton btnGrad(String text, ActionListener al) {
-        JButton btn = new JButton(text) {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                Color a2 = getModel().isPressed() ? C_G2 : C_G1;
-                Color b = getModel().isPressed() ? C_G1 : C_G2;
-                g2.setPaint(new GradientPaint(0, 0, a2, getWidth(), 0, b));
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
-                g2.setFont(getFont());
-                g2.setColor(Color.WHITE);
-                FontMetrics fm = g2.getFontMetrics();
-                g2.drawString(getText(), (getWidth() - fm.stringWidth(getText())) / 2,
-                        (getHeight() + fm.getAscent() - fm.getDescent()) / 2);
-                g2.dispose();
+            public void focusLost(FocusEvent e) {
+                f.setBorder(normBorder());
             }
-        };
-        applyBtnStyle(btn);
-        btn.addActionListener(al);
-        return btn;
+        });
+        return f;
     }
 
-    JButton btnOutline(String text, ActionListener al) {
-        JButton btn = new JButton(text) {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(getModel().isPressed() ? new Color(228, 234, 252) : C_IBG);
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
-                g2.setColor(C_IBRD);
-                g2.setStroke(new BasicStroke(1.4f));
-                g2.drawRoundRect(1, 1, getWidth() - 2, getHeight() - 2, 28, 28);
-                g2.setFont(getFont());
-                g2.setColor(C_SUB);
-                FontMetrics fm = g2.getFontMetrics();
-                g2.drawString(getText(), (getWidth() - fm.stringWidth(getText())) / 2,
-                        (getHeight() + fm.getAscent() - fm.getDescent()) / 2);
-                g2.dispose();
+    JPasswordField pass() {
+        JPasswordField f = new JPasswordField();
+        f.setMaximumSize(new Dimension(Integer.MAX_VALUE, 42));
+        f.setPreferredSize(new Dimension(380, 42));
+        f.addFocusListener(new FocusAdapter() {
+            public void focusGained(FocusEvent e) {
+                f.setBorder(focusBorder());
             }
-        };
-        applyBtnStyle(btn);
-        btn.addActionListener(al);
-        return btn;
-    }
 
-    JButton btnGhost(String text, ActionListener al) {
-        JButton btn = new JButton(text);
-        btn.setFont(F_LBL);
-        btn.setForeground(C_HINT);
-        btn.setFocusPainted(false);
-        btn.setBorderPainted(false);
-        btn.setContentAreaFilled(false);
-        btn.setOpaque(false);
-        btn.setAlignmentX(CENTER_ALIGNMENT);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.addActionListener(al);
-        return btn;
-    }
-
-    void applyBtnStyle(JButton btn) {
-        btn.setFont(F_BTN);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setBorderPainted(false);
-        btn.setContentAreaFilled(false);
-        btn.setOpaque(false);
-        btn.setMaximumSize(new Dimension(460, 46));
-        btn.setPreferredSize(new Dimension(400, 46));
-        btn.setMinimumSize(new Dimension(300, 46));
-        btn.setAlignmentX(CENTER_ALIGNMENT);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-    }
-
-    JLabel pill(String text, Color col) {
-        JLabel l = new JLabel(text) {
-            @Override
-            protected void paintComponent(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(new Color(col.getRed(), col.getGreen(), col.getBlue(), 22));
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 20, 20);
-                g2.setColor(new Color(col.getRed(), col.getGreen(), col.getBlue(), 120));
-                g2.setStroke(new BasicStroke(1f));
-                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 20, 20);
-                g2.dispose();
-                super.paintComponent(g);
+            public void focusLost(FocusEvent e) {
+                f.setBorder(normBorder());
             }
-        };
-        l.setFont(F_SMALL);
-        l.setForeground(col);
-        l.setOpaque(false);
-        l.setBorder(new EmptyBorder(4, 12, 4, 12));
-        return l;
+        });
+        return f;
     }
 
-    JLabel mkChip(String text, Color col) {
-        JLabel l = new JLabel(text);
-        l.setFont(F_SMALL);
-        l.setOpaque(true);
-        l.setBackground(new Color(0, 0, 0, 60));
-        l.setForeground(Color.WHITE);
-        l.setBorder(new EmptyBorder(5, 10, 5, 10));
-        return l;
+    JButton btnPrimary(String t) {
+        JButton b = new JButton(t);
+        b.setFont(FS);
+        b.setForeground(Color.WHITE);
+        b.setBackground(ACCENT);
+        b.setOpaque(true);
+        b.setFocusPainted(false);
+        b.setBorder(new EmptyBorder(11, 16, 11, 16));
+        b.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
+        b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        b.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                b.setBackground(ACCH);
+            }
+
+            public void mouseExited(MouseEvent e) {
+                b.setBackground(ACCENT);
+            }
+        });
+        return b;
     }
 
-    JPanel txRowCentered(String tx) {
-        JPanel row = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
-        row.setOpaque(false);
-        row.setMaximumSize(new Dimension(450, 26));
-        JLabel lbl = new JLabel(tx, SwingConstants.CENTER);
-        lbl.setFont(F_BODY);
-        lbl.setForeground(C_TEXT);
-        row.add(lbl);
-        return row;
+    JButton btnSecondary(String t) {
+        JButton b = new JButton(t);
+        b.setFont(FS);
+        b.setForeground(T2);
+        b.setBackground(CARD);
+        b.setOpaque(true);
+        b.setFocusPainted(false);
+        b.setBorder(cb(BorderFactory.createLineBorder(BORDER, 1), new EmptyBorder(10, 16, 10, 16)));
+        b.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
+        b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        b.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                b.setBackground(HOVER);
+            }
+
+            public void mouseExited(MouseEvent e) {
+                b.setBackground(CARD);
+            }
+        });
+        return b;
     }
 
-    JPanel sumRow(String lbl, String val, Color vc) {
-        JPanel row = new JPanel(new BorderLayout());
-        row.setBackground(Color.WHITE);
-        row.setMaximumSize(new Dimension(340, 28));
-        row.setPreferredSize(new Dimension(340, 28));
-        JLabel l = new JLabel(lbl);
-        l.setFont(F_BODY);
-        l.setForeground(C_SUB);
-        JLabel v = new JLabel(val);
-        v.setFont(F_BTN);
-        v.setForeground(vc);
-        Dimension vSize = new Dimension(160, v.getPreferredSize().height);
-        v.setPreferredSize(vSize);
-        v.setMinimumSize(vSize);
-        v.setMaximumSize(vSize);
-        row.add(l, BorderLayout.WEST);
-        row.add(v, BorderLayout.EAST);
-        return row;
+    JButton flatBtn(String t) {
+        JButton b = new JButton(t);
+        b.setFont(FM);
+        b.setForeground(T2);
+        b.setBackground(CARD);
+        b.setOpaque(true);
+        b.setFocusPainted(false);
+        b.setBorder(cb(BorderFactory.createLineBorder(BORDER, 1), new EmptyBorder(5, 12, 5, 12)));
+        b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        return b;
     }
 
-    JLabel cLabel(String t, Font f, Color c) {
-        JLabel l = new JLabel(t, SwingConstants.CENTER);
+    JButton optBtn(String t, Color ac) {
+        JButton b = new JButton(t);
+        b.setFont(FS);
+        b.setForeground(ac);
+        b.setBackground(CARD);
+        b.setOpaque(true);
+        b.setFocusPainted(false);
+        b.setBorder(cb(BorderFactory.createLineBorder(BORDER, 1), new EmptyBorder(9, 16, 9, 16)));
+        b.setMaximumSize(new Dimension(320, 42));
+        b.setPreferredSize(new Dimension(300, 42));
+        b.setAlignmentX(CENTER_ALIGNMENT);
+        b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        b.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                b.setBackground(HOVER);
+                b.setBorder(cb(BorderFactory.createLineBorder(ac, 1), new EmptyBorder(9, 16, 9, 16)));
+            }
+
+            public void mouseExited(MouseEvent e) {
+                b.setBackground(CARD);
+                b.setBorder(cb(BorderFactory.createLineBorder(BORDER, 1), new EmptyBorder(9, 16, 9, 16)));
+            }
+        });
+        return b;
+    }
+
+    JLabel lbl(String t, Font f, Color c) {
+        JLabel l = new JLabel(t);
         l.setFont(f);
         l.setForeground(c);
-        l.setAlignmentX(CENTER_ALIGNMENT);
         return l;
     }
 
-    JPanel bg() {
-        JPanel p = new JPanel();
-        p.setBackground(C_BG);
-        p.setOpaque(true);
+    JLabel link(String t) {
+        JLabel l = lbl(t, FM, ACCENT);
+        l.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        l.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                l.setForeground(T1);
+            }
+
+            public void mouseExited(MouseEvent e) {
+                l.setForeground(ACCENT);
+            }
+        });
+        return l;
+    }
+
+    Component vsp(int n) {
+        return Box.createVerticalStrut(n);
+    }
+
+    JSeparator hr() {
+        JSeparator s = new JSeparator();
+        s.setForeground(BORDER);
+        s.setMaximumSize(new Dimension(Integer.MAX_VALUE, 1));
+        return s;
+    }
+
+    JPanel flow(int gap) {
+        JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER, gap, 0));
+        p.setOpaque(false);
         return p;
     }
 
-    Box.Filler vg(int h) {
-        return (Box.Filler) Box.createVerticalStrut(h);
+    JPanel flow(int align, int gap) {
+        JPanel p = new JPanel(new FlowLayout(align, gap, 0));
+        p.setOpaque(false);
+        return p;
     }
 
-    JPanel mkFooter() {
+    Component divider(String txt) {
+        JPanel r = new JPanel(new BorderLayout(10, 0));
+        r.setOpaque(false);
+        r.setMaximumSize(new Dimension(Integer.MAX_VALUE, 18));
+        JSeparator l = new JSeparator(), rr = new JSeparator();
+        l.setForeground(BORDER);
+        rr.setForeground(BORDER);
+        JLabel c = lbl(txt, FM, T3);
+        c.setHorizontalAlignment(SwingConstants.CENTER);
+        r.add(l, BorderLayout.WEST);
+        r.add(c, BorderLayout.CENTER);
+        r.add(rr, BorderLayout.EAST);
+        return r;
+    }
+
+    JPanel footer() {
         JPanel p = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        p.setBackground(C_BG);
-        p.setBorder(new EmptyBorder(2, 0, 8, 0));
-        JLabel l = new JLabel("\u00a9 2026 Philippine National Banco  \u00b7  256-bit encrypted");
-        l.setFont(F_SMALL);
-        l.setForeground(C_HINT);
-        p.add(l);
+        p.setBackground(BG);
+        p.setBorder(new EmptyBorder(2, 0, 10, 0));
+        p.add(lbl("\u00A9 2026 Philippine National Banc  \u00B7  256-bit Encrypted", FM, T3));
         return p;
     }
 
-    JPanel dlgPanel(String title, String sub) {
+    JPanel dlg(String title, String sub) {
         JPanel p = new JPanel();
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
-        p.setBackground(Color.WHITE);
-        p.setBorder(new EmptyBorder(8, 4, 8, 4));
-        JLabel t = new JLabel(title);
-        t.setFont(F_TITLE);
-        t.setForeground(C_TEXT);
+        p.setBackground(SURFACE);
+        p.setBorder(new EmptyBorder(14, 14, 14, 14));
+        JLabel t = lbl(title, FH, T1);
         t.setAlignmentX(CENTER_ALIGNMENT);
-        JLabel s = new JLabel(sub);
-        s.setFont(F_LBL);
-        s.setForeground(C_SUB);
+        JLabel s = lbl(sub, FM, T3);
         s.setAlignmentX(CENTER_ALIGNMENT);
         p.add(t);
-        p.add(Box.createVerticalStrut(3));
+        p.add(vsp(3));
         p.add(s);
-        p.add(Box.createVerticalStrut(18));
+        p.add(vsp(16));
         return p;
     }
 
-    JTextField iField(String ph) {
-        JTextField f = new JTextField(20);
-        f.setFont(F_BODY);
-        f.setBackground(C_IBG);
-        f.setForeground(C_TEXT);
-        f.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(C_IBRD, 1), new EmptyBorder(8, 12, 8, 12)));
-        f.setMaximumSize(new Dimension(340, 40));
-        f.setPreferredSize(new Dimension(320, 40));
-        f.setMinimumSize(new Dimension(280, 40));
-        f.setHorizontalAlignment(SwingConstants.CENTER);
-        return f;
-    }
-
-    JPasswordField pField(String ph) {
-        JPasswordField f = new JPasswordField(20);
-        f.setFont(F_BODY);
-        f.setBackground(C_IBG);
-        f.setForeground(C_TEXT);
-        f.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(C_IBRD, 1), new EmptyBorder(8, 12, 8, 12)));
-        f.setMaximumSize(new Dimension(340, 40));
-        f.setPreferredSize(new Dimension(320, 40));
-        f.setMinimumSize(new Dimension(280, 40));
-        f.setHorizontalAlignment(SwingConstants.CENTER);
-        return f;
-    }
-
-    void addRow(JPanel p, String lbl, JComponent field) {
-        JLabel l = new JLabel(lbl);
-        l.setFont(F_LBL);
-        l.setForeground(C_SUB);
+    void capRow(JPanel p, String cap) {
+        JLabel l = lbl(cap, FL, T3);
         l.setAlignmentX(CENTER_ALIGNMENT);
-        field.setAlignmentX(CENTER_ALIGNMENT);
         p.add(l);
-        p.add(Box.createVerticalStrut(5));
-        p.add(field);
-        p.add(Box.createVerticalStrut(13));
+        p.add(vsp(6));
     }
 
-    String askAmt(String title, String msg, String lbl) {
-        JPanel p = dlgPanel(title, msg);
-        JTextField f = iField(lbl);
-        addRow(p, lbl, f);
-        return dlgOk(p, title) ? f.getText().trim() : null;
+    void row(JPanel p, String cap, JComponent f) {
+        JLabel l = lbl(cap, FL, T3);
+        l.setAlignmentX(CENTER_ALIGNMENT);
+        f.setAlignmentX(CENTER_ALIGNMENT);
+        p.add(l);
+        p.add(vsp(5));
+        p.add(f);
+        p.add(vsp(13));
     }
 
-    boolean dlgOk(JPanel p, String title) {
-        return JOptionPane.showConfirmDialog(this, p, title,
-                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE) == JOptionPane.OK_OPTION;
-    }
-
-    double safeD(String s) {
-        try {
-            double v = Double.parseDouble(s);
-            if (v <= 0) {
-                err("Amount must be greater than zero.");
-                return -1;
-            }
-            return v;
-        } catch (NumberFormatException e) {
-            err("Please enter a valid number.");
-            return -1;
+    JPanel infoGrid(String[] lbls, String[] vals, Color[] cols) {
+        JPanel g = new JPanel(new GridLayout(lbls.length, 2, 10, 6));
+        g.setBackground(CARD);
+        g.setBorder(cb(BorderFactory.createLineBorder(BORDER, 1), new EmptyBorder(10, 14, 10, 14)));
+        g.setMaximumSize(new Dimension(Integer.MAX_VALUE, lbls.length * 32));
+        g.setAlignmentX(CENTER_ALIGNMENT);
+        for (int i = 0; i < lbls.length; i++) {
+            g.add(lbl(lbls[i], FB, T2));
+            g.add(lbl(vals[i], FS, cols[i]));
         }
+        return g;
+    }
+
+    JPanel sumRow(String l, String v, Color vc) {
+        JPanel r = new JPanel(new BorderLayout());
+        r.setOpaque(false);
+        r.setMaximumSize(new Dimension(Integer.MAX_VALUE, 26));
+        r.add(lbl(l, FB, T2), BorderLayout.WEST);
+        r.add(lbl(v, FS, vc), BorderLayout.EAST);
+        return r;
+    }
+
+    JDialog mkDlg(JPanel c, String t) {
+        JDialog d = new JOptionPane(c, JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{}).createDialog(this, t);
+        d.getContentPane().setBackground(SURFACE);
+        return d;
+    }
+
+    MouseAdapter click(ActionListener al) {
+        return new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                al.actionPerformed(null);
+            }
+        };
+    }
+
+    String askAmt(String t, String l) {
+        JTextField f = field();
+        JPanel p = dlg(t, l);
+        row(p, "AMOUNT (\u20B1)", f);
+        return ok(p, t) ? f.getText().trim() : null;
+    }
+
+    boolean ok(JPanel p, String t) {
+        return JOptionPane.showConfirmDialog(this, p, t, JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE) == JOptionPane.OK_OPTION;
     }
 
     void err(String m) {
         JOptionPane.showMessageDialog(this, m, "Error", JOptionPane.ERROR_MESSAGE);
     }
 
-    void ok(String m) {
-        JOptionPane.showMessageDialog(this, m, "Success", JOptionPane.INFORMATION_MESSAGE);
+    void msg(String m) {
+        JOptionPane.showMessageDialog(this, m, "", JOptionPane.PLAIN_MESSAGE);
+    }
+
+    double parseAmt(String s) {
+        try {
+            double v = Double.parseDouble(s);
+            if (v <= 0) {
+                err("Amount must be > 0.");
+                return -1;
+            }
+            return v;
+        } catch (NumberFormatException e) {
+            err("Enter a valid number.");
+            return -1;
+        }
     }
 
     String fmt(double v) {
@@ -1095,9 +1087,19 @@ public class oopBC extends JFrame {
             return String.format("%.2fM", v / 1_000_000);
         }
         if (Math.abs(v) >= 1_000) {
-            return String.format("%.2fK", v / 1_000);
+            return String.format("%.1fK", v / 1_000);
         }
         return fmt(v);
+    }
+
+    int findAcc(long id) {
+        for (int i = 0; i < count; i++) {
+            if (accounts[i].getId() == id) {
+                return i;
+
+            }
+        }
+        return -1;
     }
 
     void swap(JPanel p) {
@@ -1107,10 +1109,10 @@ public class oopBC extends JFrame {
     }
 
     static void saveData() {
-        try (PrintWriter pw = new PrintWriter(new FileWriter(FILE_NAME))) {
-            pw.println(accountCount);
+        try (PrintWriter pw = new PrintWriter(new FileWriter(FILE))) {
+            pw.println(count);
             pw.println(nextId);
-            for (int i = 0; i < accountCount; i++) {
+            for (int i = 0; i < count; i++) {
                 pw.println(accounts[i].toFileString(DTF));
             }
         } catch (Exception e) {
@@ -1119,14 +1121,14 @@ public class oopBC extends JFrame {
     }
 
     static void loadData() {
-        try (BufferedReader br = new BufferedReader(new FileReader(FILE_NAME))) {
-            accountCount = Integer.parseInt(br.readLine());
+        try (BufferedReader br = new BufferedReader(new FileReader(FILE))) {
+            count = Integer.parseInt(br.readLine());
             nextId = Long.parseLong(br.readLine());
-            for (int i = 0; i < accountCount; i++) {
+            for (int i = 0; i < count; i++) {
                 accounts[i] = BankAccount.fromFileString(br.readLine(), DTF);
             }
-        } catch (Exception ignored) {
-            accountCount = 0;
+        } catch (Exception e) {
+            count = 0;
         }
     }
 
@@ -1138,17 +1140,25 @@ public class oopBC extends JFrame {
 class BankAccount {
 
     private final long id;
-    private final String name;
-    private final String password;
+    private final String name, password;
     private double wallet, savings, loanBalance;
-    private LocalDateTime lastSavingsInterest, loanStart;
+    private LocalDateTime lastSavingsDate, loanStartDate;
     private final LinkedList<String> txHistory = new LinkedList<>();
 
     public BankAccount(long id, String name, String password) {
         this.id = id;
         this.name = name;
         this.password = password;
-        lastSavingsInterest = LocalDateTime.now();
+        lastSavingsDate = LocalDateTime.now();
+    }
+
+    public void copyFrom(BankAccount o) {
+        wallet = o.wallet;
+        savings = o.savings;
+        loanBalance = o.loanBalance;
+        lastSavingsDate = o.lastSavingsDate;
+        loanStartDate = o.loanStartDate;
+        txHistory.addAll(o.txHistory);
     }
 
     public long getId() {
@@ -1201,8 +1211,8 @@ class BankAccount {
     }
 
     public void borrowLoan(double a) {
-        if (loanStart == null) {
-            loanStart = LocalDateTime.now();
+        if (loanStartDate == null) {
+            loanStartDate = LocalDateTime.now();
         }
         loanBalance += a;
         wallet += a;
@@ -1214,27 +1224,27 @@ class BankAccount {
             loanBalance -= a;
             if (loanBalance <= 0) {
                 loanBalance = 0;
-                loanStart = null;
+                loanStartDate = null;
             }
         }
     }
 
     public void applySavingsInterest() {
-        if (savings > 0 && lastSavingsInterest != null) {
-            long d = ChronoUnit.DAYS.between(lastSavingsInterest, LocalDateTime.now());
+        if (savings > 0 && lastSavingsDate != null) {
+            long d = ChronoUnit.DAYS.between(lastSavingsDate, LocalDateTime.now());
             if (d > 0) {
                 savings += savings * 0.01 * d;
-                lastSavingsInterest = LocalDateTime.now();
+                lastSavingsDate = LocalDateTime.now();
             }
         }
     }
 
     public void applyLoanInterest() {
-        if (loanBalance > 0 && loanStart != null) {
-            long d = ChronoUnit.DAYS.between(loanStart, LocalDateTime.now());
+        if (loanBalance > 0 && loanStartDate != null) {
+            long d = ChronoUnit.DAYS.between(loanStartDate, LocalDateTime.now());
             if (d > 0) {
                 loanBalance += loanBalance * 0.05 * d;
-                loanStart = LocalDateTime.now();
+                loanStartDate = LocalDateTime.now();
             }
         }
     }
@@ -1243,6 +1253,7 @@ class BankAccount {
         txHistory.addFirst(tx);
         if (txHistory.size() > 6) {
             txHistory.removeLast();
+
         }
     }
 
@@ -1253,9 +1264,8 @@ class BankAccount {
     public String toFileString(DateTimeFormatter dtf) {
         String txs = String.join("||", txHistory);
         return id + ", " + name + ", " + password + ", " + wallet + ", " + savings + ", " + loanBalance + ", "
-                + lastSavingsInterest.format(dtf) + ", "
-                + (loanStart != null ? loanStart.format(dtf) : "no loan") + ", "
-                + (txs.isEmpty() ? "no_tx" : txs);
+                + lastSavingsDate.format(dtf) + ", " + (loanStartDate != null ? loanStartDate.format(dtf) : "no loan")
+                + ", " + (txs.isEmpty() ? "no_tx" : txs);
     }
 
     public static BankAccount fromFileString(String line, DateTimeFormatter dtf) {
@@ -1264,8 +1274,8 @@ class BankAccount {
         a.wallet = Double.parseDouble(p[3]);
         a.savings = Double.parseDouble(p[4]);
         a.loanBalance = Double.parseDouble(p[5]);
-        a.lastSavingsInterest = LocalDateTime.parse(p[6], dtf);
-        a.loanStart = p[7].equals("no loan") ? null : LocalDateTime.parse(p[7], dtf);
+        a.lastSavingsDate = LocalDateTime.parse(p[6], dtf);
+        a.loanStartDate = p[7].equals("no loan") ? null : LocalDateTime.parse(p[7], dtf);
         if (p.length > 8 && !p[8].equals("no_tx")) {
             for (String tx : p[8].split("\\|\\|")) {
                 a.txHistory.add(tx);
