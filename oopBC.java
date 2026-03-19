@@ -9,6 +9,7 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.border.*;
 
+
 public class oopBC extends JFrame {
 
     static final String FILE = "wrath.txt";
@@ -18,24 +19,35 @@ public class oopBC extends JFrame {
     static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss");
     private int loggedIn = -1;
 
-    static final Color BG = new Color(11, 13, 18), SURFACE = new Color(18, 21, 28),
-            CARD = new Color(24, 28, 38), HOVER = new Color(30, 35, 48),
-            BORDER = new Color(40, 46, 62), ACCENT = new Color(56, 128, 240),
-            ACCH = new Color(38, 98, 200), GREEN = new Color(48, 190, 120),
-            RED = new Color(230, 75, 75), GOLD = new Color(220, 170, 40),
-            T1 = new Color(228, 232, 242), T2 = new Color(130, 142, 170), T3 = new Color(64, 74, 98);
+    static final Color BG = new Color(11, 13, 18);
+    static final Color SURFACE = new Color(18, 21, 28);
+    static final Color CARD = new Color(24, 28, 38);
+    static final Color HOVER = new Color(30, 35, 48);
+    static final Color BORDER = new Color(40, 46, 62);
+    static final Color ACCENT = new Color(56, 128, 240);
+    static final Color ACCH = new Color(38, 98, 200);
+    static final Color GREEN = new Color(48, 190, 120);
+    static final Color RED = new Color(230, 75, 75);
+    static final Color GOLD = new Color(220, 170, 40);
+    static final Color T1 = new Color(228, 232, 242);
+    static final Color T2 = new Color(130, 142, 170);
+    static final Color T3 = new Color(64, 74, 98);
 
-    static final Font FH = new Font("Segoe UI", Font.BOLD, 15), FS = new Font("Segoe UI", Font.BOLD, 13),
-            FB = new Font("Segoe UI", Font.PLAIN, 13), FM = new Font("Segoe UI", Font.PLAIN, 11),
-            FL = new Font("Segoe UI", Font.BOLD, 10), FN = new Font("Segoe UI", Font.BOLD, 14),
-            FG = new Font("Segoe UI", Font.BOLD, 26), FEM = new Font("Segoe UI Emoji", Font.PLAIN, 18);
+    static final Font FH = new Font("Segoe UI", Font.BOLD, 15);
+    static final Font FS = new Font("Segoe UI", Font.BOLD, 13);
+    static final Font FB = new Font("Segoe UI", Font.PLAIN, 13);
+    static final Font FM = new Font("Segoe UI", Font.PLAIN, 11);
+    static final Font FL = new Font("Segoe UI", Font.BOLD, 10);
+    static final Font FN = new Font("Segoe UI", Font.BOLD, 14);
+    static final Font FG = new Font("Segoe UI", Font.BOLD, 26);
+    static final Font FEM = new Font("Segoe UI Emoji", Font.PLAIN, 18);
 
     static final double LOAN_MIN = 500;
     static final double[] TIER_REQ = {10000, 5000, 2000, 500}, TIER_LIM = {50000, 15000, 5000, 1000};
     static final String[] TIER_NAME = {"\uD83D\uDC8E Platinum", "\uD83E\uDD47 Gold", "\uD83E\uDD48 Silver", "\uD83E\uDD49 Bronze"};
 
     public oopBC() {
-        patchUI();
+        setupTheme();
         setTitle("Philippine National Banc");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(460, 760);
@@ -48,22 +60,26 @@ public class oopBC extends JFrame {
         setVisible(true);
     }
 
-    static void patchUI() {
+    static void setupTheme() {
         try {
             UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
         } catch (Exception ignored) {
         }
         Border nb = cb(BorderFactory.createLineBorder(BORDER, 1), new EmptyBorder(9, 12, 9, 12));
-        String[] tf = {"TextField", "PasswordField"};
-        for (String k : tf) {
-            UIManager.put(k + ".background", CARD);
-            UIManager.put(k + ".foreground", T1);
-            UIManager.put(k + ".caretForeground", T1);
-            UIManager.put(k + ".selectionBackground", ACCENT);
-            UIManager.put(k + ".selectionForeground", Color.WHITE);
-            UIManager.put(k + ".border", nb);
-            UIManager.put(k + ".font", FB);
-        }
+        UIManager.put("TextField.background", CARD);
+        UIManager.put("TextField.foreground", T1);
+        UIManager.put("TextField.caretForeground", T1);
+        UIManager.put("TextField.selectionBackground", ACCENT);
+        UIManager.put("TextField.selectionForeground", Color.WHITE);
+        UIManager.put("TextField.border", nb);
+        UIManager.put("TextField.font", FB);
+        UIManager.put("PasswordField.background", CARD);
+        UIManager.put("PasswordField.foreground", T1);
+        UIManager.put("PasswordField.caretForeground", T1);
+        UIManager.put("PasswordField.selectionBackground", ACCENT);
+        UIManager.put("PasswordField.selectionForeground", Color.WHITE);
+        UIManager.put("PasswordField.border", nb);
+        UIManager.put("PasswordField.font", FB);
         UIManager.put("Panel.background", SURFACE);
         UIManager.put("OptionPane.background", SURFACE);
         UIManager.put("OptionPane.messageForeground", T1);
@@ -86,18 +102,18 @@ public class oopBC extends JFrame {
         return BorderFactory.createCompoundBorder(a, b);
     }
 
-    static Border focusBorder() {
+    static Border inputFocusBorder() {
         return cb(BorderFactory.createLineBorder(ACCENT, 1), new EmptyBorder(9, 12, 9, 12));
     }
 
-    static Border normBorder() {
+    static Border inputBorder() {
         return cb(BorderFactory.createLineBorder(BORDER, 1), new EmptyBorder(9, 12, 9, 12));
     }
 
     void showLogin() {
         JPanel root = new JPanel(new GridBagLayout());
         root.setBackground(BG);
-        JPanel card = roundCard(360, 510, 18);
+        JPanel card = cardPanel(360, 510, 18);
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
         card.setBorder(new EmptyBorder(36, 36, 36, 36));
 
@@ -332,7 +348,7 @@ public class oopBC extends JFrame {
     }
 
     JPanel netCard(double net) {
-        JPanel nc = roundCard(-1, 100, 14);
+        JPanel nc = cardPanel(-1, 100, 14);
         nc.setLayout(new BorderLayout());
         nc.setMaximumSize(new Dimension(Integer.MAX_VALUE, 100));
         nc.setPreferredSize(new Dimension(1, 100));
@@ -357,7 +373,7 @@ public class oopBC extends JFrame {
     }
 
     JPanel statTile(String label, double val, Color vc) {
-        JPanel t = roundCard(-1, 76, 10);
+        JPanel t = cardPanel(-1, 76, 10);
         t.setLayout(new BoxLayout(t, BoxLayout.Y_AXIS));
         t.setBorder(new EmptyBorder(11, 12, 11, 12));
         t.add(lbl(label, FL, T3));
@@ -367,7 +383,7 @@ public class oopBC extends JFrame {
     }
 
     JPanel tile(String emoji, String label, ActionListener al) {
-        JPanel t = roundCard(-1, -1, 10);
+        JPanel t = cardPanel(-1, -1, 10);
         t.setLayout(new GridBagLayout());
         t.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         JPanel col = new JPanel();
@@ -463,7 +479,7 @@ public class oopBC extends JFrame {
         p.add(w);
         p.add(vsp(8));
         p.add(c);
-        ref[0] = mkDlg(p, "Savings");
+        ref[0] = buildDialog(p, "Savings");
         ref[0].setVisible(true);
         if (pick[0] == 0) {
             String s = askAmt("Deposit to Savings", "Move from wallet to savings");
@@ -508,20 +524,18 @@ public class oopBC extends JFrame {
         for (int i = 0; i < TIER_REQ.length; i++) {
             if (b >= TIER_REQ[i]) {
                 return TIER_NAME[i];
-
+        
             }
-        }
-        return "None";
+        }return "None";
     }
 
     double tierLim(double b) {
         for (int i = 0; i < TIER_REQ.length; i++) {
             if (b >= TIER_REQ[i]) {
                 return TIER_LIM[i];
-
+        
             }
-        }
-        return 0;
+        }return 0;
     }
 
     void showLoan() {
@@ -539,7 +553,7 @@ public class oopBC extends JFrame {
                 lc[i] = GOLD;
             }
             p.add(infoGrid(ln, lv, lc));
-            mkDlg(p, "Loan Tiers").setVisible(true);
+            buildDialog(p, "Loan Tiers").setVisible(true);
             return;
         }
         double lim = tierLim(bal);
@@ -570,7 +584,7 @@ public class oopBC extends JFrame {
         p.add(r);
         p.add(vsp(8));
         p.add(c);
-        ref[0] = mkDlg(p, "Loan");
+        ref[0] = buildDialog(p, "Loan");
         ref[0].setVisible(true);
         if (pick[0] == 0) {
             String s = askAmt("Borrow", "Max \u20B1" + fmt(lim) + " | 5% daily interest");
@@ -634,7 +648,7 @@ public class oopBC extends JFrame {
         p.add(hr());
         p.add(vsp(12));
         p.add(sumRow("Net Assets", "\u20B1 " + fmt(net), net >= 0 ? GREEN : RED));
-        mkDlg(p, "Summary").setVisible(true);
+        buildDialog(p, "Summary").setVisible(true);
     }
 
     void showCurrencyExchange() {
@@ -657,7 +671,7 @@ public class oopBC extends JFrame {
         JButton cx = optBtn("Cancel", T3);
         cx.addActionListener(e -> ref[0].dispose());
         p.add(cx);
-        ref[0] = mkDlg(p, "Exchange");
+        ref[0] = buildDialog(p, "Exchange");
         ref[0].setVisible(true);
         if (pick[0] < 0) {
             return;
@@ -670,10 +684,30 @@ public class oopBC extends JFrame {
         if (a <= 0) {
             return;
         }
-        String[] res = {"\u20B1" + fmt(a) + " = $" + fmt(a / 56), "$" + fmt(a) + " = \u20B1" + fmt(a * 56),
-            "\u20AC" + fmt(a) + " = $" + fmt(a * 1.08), "\u20AC" + fmt(a) + " = \u20B1" + fmt(a * 60),
-            "$" + fmt(a) + " = \u20AC" + fmt(a / 1.08), "\u00A5" + fmt(a) + " = \u20B1" + fmt(a * 0.38)};
-        msg("Result\n\n" + res[pick[0]] + "\n\n(Approximate rates)");
+        String result;
+        switch (pick[0]) {
+            case 0:
+                result = "\u20B1" + fmt(a) + " = $" + fmt(a / 56);
+                break;
+            case 1:
+                result = "$" + fmt(a) + " = \u20B1" + fmt(a * 56);
+                break;
+            case 2:
+                result = "\u20AC" + fmt(a) + " = $" + fmt(a * 1.08);
+                break;
+            case 3:
+                result = "\u20AC" + fmt(a) + " = \u20B1" + fmt(a * 60);
+                break;
+            case 4:
+                result = "$" + fmt(a) + " = \u20AC" + fmt(a / 1.08);
+                break;
+            case 5:
+                result = "\u00A5" + fmt(a) + " = \u20B1" + fmt(a * 0.38);
+                break;
+            default:
+                result = "";
+        }
+        msg("Result\n\n" + result + "\n\n(Approximate rates)");
     }
 
     void showTransfer() {
@@ -751,12 +785,12 @@ public class oopBC extends JFrame {
                 String tx = txs[i];
                 Color c = T2;
                 if (tx.contains("Deposit") || tx.contains("\u2192") || tx.contains("From ")) {
-                    c = GREEN;
-                } else if (tx.contains("Withdrawal") || tx.contains("To ")) {
-                    c = RED;
-                } else if (tx.contains("Loan (")) {
-                    c = GOLD;
-                } else if (tx.contains("Payment")) {
+                    c = GREEN; 
+                }else if (tx.contains("Withdrawal") || tx.contains("To ")) {
+                    c = RED; 
+                }else if (tx.contains("Loan (")) {
+                    c = GOLD; 
+                }else if (tx.contains("Payment")) {
                     c = ACCENT;
                 }
                 JPanel r = new JPanel(new BorderLayout());
@@ -770,10 +804,10 @@ public class oopBC extends JFrame {
                 }
             }
         }
-        mkDlg(p, "History").setVisible(true);
+        buildDialog(p, "History").setVisible(true);
     }
 
-    JPanel roundCard(int w, int h, int r) {
+    JPanel cardPanel(int w, int h, int r) {
         JPanel p = new JPanel() {
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
@@ -800,11 +834,11 @@ public class oopBC extends JFrame {
         f.setPreferredSize(new Dimension(380, 42));
         f.addFocusListener(new FocusAdapter() {
             public void focusGained(FocusEvent e) {
-                f.setBorder(focusBorder());
+                f.setBorder(inputFocusBorder());
             }
 
             public void focusLost(FocusEvent e) {
-                f.setBorder(normBorder());
+                f.setBorder(inputBorder());
             }
         });
         return f;
@@ -816,11 +850,11 @@ public class oopBC extends JFrame {
         f.setPreferredSize(new Dimension(380, 42));
         f.addFocusListener(new FocusAdapter() {
             public void focusGained(FocusEvent e) {
-                f.setBorder(focusBorder());
+                f.setBorder(inputFocusBorder());
             }
 
             public void focusLost(FocusEvent e) {
-                f.setBorder(normBorder());
+                f.setBorder(inputBorder());
             }
         });
         return f;
@@ -1031,7 +1065,7 @@ public class oopBC extends JFrame {
         return r;
     }
 
-    JDialog mkDlg(JPanel c, String t) {
+    JDialog buildDialog(JPanel c, String t) {
         JDialog d = new JOptionPane(c, JOptionPane.PLAIN_MESSAGE, JOptionPane.DEFAULT_OPTION, null, new Object[]{}).createDialog(this, t);
         d.getContentPane().setBackground(SURFACE);
         return d;
@@ -1096,10 +1130,9 @@ public class oopBC extends JFrame {
         for (int i = 0; i < count; i++) {
             if (accounts[i].getId() == id) {
                 return i;
-
+        
             }
-        }
-        return -1;
+        }return -1;
     }
 
     void swap(JPanel p) {
@@ -1192,9 +1225,8 @@ class BankAccount {
     public void withdrawWallet(double a) {
         if (wallet >= a) {
             wallet -= a;
-
-        }
-    }
+    
+        }}
 
     public void depositSavings(double a) {
         if (wallet >= a) {
@@ -1253,9 +1285,8 @@ class BankAccount {
         txHistory.addFirst(tx);
         if (txHistory.size() > 6) {
             txHistory.removeLast();
-
-        }
-    }
+    
+        }}
 
     public String[] getLastTransactions() {
         return txHistory.toArray(new String[0]);
