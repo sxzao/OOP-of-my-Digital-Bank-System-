@@ -9,10 +9,9 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.border.*;
 
-
 public class oopBC extends JFrame {
 
-    static final String FILE = "wrath.txt";
+    static final String FILE = "finalfile.txt";
     static BankAccount[] accounts = new BankAccount[100];
     static int count = 0;
     static long nextId = 66671001;
@@ -32,7 +31,6 @@ public class oopBC extends JFrame {
     static final Color T1 = new Color(228, 232, 242);
     static final Color T2 = new Color(130, 142, 170);
     static final Color T3 = new Color(64, 74, 98);
-
     static final Font FH = new Font("Segoe UI", Font.BOLD, 15);
     static final Font FS = new Font("Segoe UI", Font.BOLD, 13);
     static final Font FB = new Font("Segoe UI", Font.PLAIN, 13);
@@ -42,13 +40,14 @@ public class oopBC extends JFrame {
     static final Font FG = new Font("Segoe UI", Font.BOLD, 26);
     static final Font FEM = new Font("Segoe UI Emoji", Font.PLAIN, 18);
 
-    static final double LOAN_MIN = 500;
-    static final double[] TIER_REQ = {10000, 5000, 2000, 500}, TIER_LIM = {50000, 15000, 5000, 1000};
+    static final double LOAN_MIN = 10000;
+    static final double[] TIER_REQ = {50000, 30000, 20000, 10000};
+    static final double[] TIER_LIM = {30000, 20000, 10000, 5000};
     static final String[] TIER_NAME = {"\uD83D\uDC8E Platinum", "\uD83E\uDD47 Gold", "\uD83E\uDD48 Silver", "\uD83E\uDD49 Bronze"};
 
     public oopBC() {
         setupTheme();
-        setTitle("Philippine National Banc");
+        setTitle("Philippine National Banco");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setSize(460, 760);
         setMinimumSize(new Dimension(460, 760));
@@ -232,38 +231,32 @@ public class oopBC extends JFrame {
     }
 
     void showForgotPassword() {
-        JTextField iF = field();
-        JPasswordField nF = pass(), cF = pass();
-        JPanel p = dlg("Reset Password", "Enter your Account ID and new password");
-        row(p, "ACCOUNT ID", iF);
-        row(p, "NEW PASSWORD", nF);
-        row(p, "CONFIRM PASSWORD", cF);
-        if (!ok(p, "Reset Password")) {
-            return;
-        }
-        try {
-            int i = findAcc(Long.parseLong(iF.getText().trim()));
-            if (i < 0) {
-                err("Account not found.");
-                return;
-            }
-            String np = new String(nF.getPassword());
-            if (np.length() < 4) {
-                err("Password must be at least 4 characters.");
-                return;
-            }
-            if (!np.equals(new String(cF.getPassword()))) {
-                err("Passwords do not match.");
-                return;
-            }
-            BankAccount u = new BankAccount(accounts[i].getId(), accounts[i].getName(), np);
-            u.copyFrom(accounts[i]);
-            accounts[i] = u;
-            saveData();
-            msg("Password updated. You can now sign in.");
-        } catch (NumberFormatException ex) {
-            err("Account ID must be numeric.");
-        }
+        JPanel p = dlg("Forgot Password", "We'll help you get back in");
+        JLabel l1 = lbl("To reset your password, please contact our", FB, T2);
+        JLabel l2 = lbl("customer service and we will assist you.", FB, T2);
+        JLabel l3 = lbl("support@pnb.com  |  +63 67 281 9295", FM, ACCENT);
+        l1.setAlignmentX(CENTER_ALIGNMENT);
+        l2.setAlignmentX(CENTER_ALIGNMENT);
+        l3.setAlignmentX(CENTER_ALIGNMENT);
+        p.add(l1);
+        p.add(vsp(4));
+        p.add(l2);
+        p.add(vsp(10));
+        p.add(l3);
+        p.add(vsp(16));
+        JDialog[] ref = {null};
+        JButton send = optBtn("Send Request to Customer Service", ACCENT);
+        JButton cancel = optBtn("Cancel", T3);
+        send.addActionListener(e -> {
+            ref[0].dispose();
+            msg("Concern sent to customer service.\nWe will contact you as soon as possible.");
+        });
+        cancel.addActionListener(e -> ref[0].dispose());
+        p.add(send);
+        p.add(vsp(8));
+        p.add(cancel);
+        ref[0] = buildDialog(p, "Forgot Password");
+        ref[0].setVisible(true);
     }
 
     void showDashboard() {
@@ -316,7 +309,7 @@ public class oopBC extends JFrame {
         body.add(vsp(22));
 
         JLabel qa = lbl("QUICK ACTIONS", FL, T3);
-        qa.setAlignmentX(Component.LEFT_ALIGNMENT);
+        qa.setAlignmentX(CENTER_ALIGNMENT);
         body.add(qa);
         body.add(vsp(10));
 
@@ -457,7 +450,7 @@ public class oopBC extends JFrame {
     void showSavings() {
         accounts[loggedIn].applySavingsInterest();
         BankAccount a = accounts[loggedIn];
-        JPanel p = dlg("Savings Account", "1% interest per day");
+        JPanel p = dlg("Savings Account", "4% interest per month (compounded)");
         p.add(infoGrid(new String[]{"Savings", "Wallet"},
                 new String[]{"\u20B1 " + fmt(a.getSavings()), "\u20B1 " + fmt(a.getWallet())},
                 new Color[]{GREEN, ACCENT}));
@@ -524,32 +517,34 @@ public class oopBC extends JFrame {
         for (int i = 0; i < TIER_REQ.length; i++) {
             if (b >= TIER_REQ[i]) {
                 return TIER_NAME[i];
-        
+
             }
-        }return "None";
+        }
+        return "None";
     }
 
     double tierLim(double b) {
         for (int i = 0; i < TIER_REQ.length; i++) {
             if (b >= TIER_REQ[i]) {
                 return TIER_LIM[i];
-        
+
             }
-        }return 0;
+        }
+        return 0;
     }
 
     void showLoan() {
         accounts[loggedIn].applyLoanInterest();
         BankAccount a = accounts[loggedIn];
-        double bal = a.getWallet() + a.getSavings();
+        double bal = a.getWallet();
         if (bal < LOAN_MIN) {
-            JPanel p = dlg("Loan Unavailable", "Minimum \u20B1" + fmt(LOAN_MIN) + " total balance required");
+            JPanel p = dlg("Loan Unavailable", "Need at least \u20B1" + fmt(LOAN_MIN) + " in wallet to qualify");
             String[] ln = new String[4];
             String[] lv = new String[4];
             Color[] lc = new Color[4];
             for (int i = 0; i < 4; i++) {
                 ln[i] = TIER_NAME[i];
-                lv[i] = "\u20B1" + fmt(TIER_REQ[i]) + " \u2192 \u20B1" + fmt(TIER_LIM[i]);
+                lv[i] = "Wallet \u20B1" + fmt(TIER_REQ[i]) + " \u2192 borrow \u20B1" + fmt(TIER_LIM[i]);
                 lc[i] = GOLD;
             }
             p.add(infoGrid(ln, lv, lc));
@@ -563,7 +558,7 @@ public class oopBC extends JFrame {
                 new String[]{"\u20B1 " + fmt(a.getWallet()), "\u20B1 " + fmt(a.getLoan())},
                 new Color[]{ACCENT, a.getLoan() > 0 ? RED : T3}));
         p.add(vsp(6));
-        JLabel wi = lbl("5% daily interest on outstanding loans", FM, RED);
+        JLabel wi = lbl("9% monthly interest on outstanding loans", FM, RED);
         wi.setAlignmentX(CENTER_ALIGNMENT);
         p.add(wi);
         p.add(vsp(14));
@@ -587,7 +582,7 @@ public class oopBC extends JFrame {
         ref[0] = buildDialog(p, "Loan");
         ref[0].setVisible(true);
         if (pick[0] == 0) {
-            String s = askAmt("Borrow", "Max \u20B1" + fmt(lim) + " | 5% daily interest");
+            String s = askAmt("Borrow", "Max \u20B1" + fmt(lim) + " | 9% monthly interest");
             if (s == null) {
                 return;
             }
@@ -785,12 +780,12 @@ public class oopBC extends JFrame {
                 String tx = txs[i];
                 Color c = T2;
                 if (tx.contains("Deposit") || tx.contains("\u2192") || tx.contains("From ")) {
-                    c = GREEN; 
-                }else if (tx.contains("Withdrawal") || tx.contains("To ")) {
-                    c = RED; 
-                }else if (tx.contains("Loan (")) {
-                    c = GOLD; 
-                }else if (tx.contains("Payment")) {
+                    c = GREEN;
+                } else if (tx.contains("Withdrawal") || tx.contains("To ")) {
+                    c = RED;
+                } else if (tx.contains("Loan (")) {
+                    c = GOLD;
+                } else if (tx.contains("Payment")) {
                     c = ACCENT;
                 }
                 JPanel r = new JPanel(new BorderLayout());
@@ -1130,9 +1125,10 @@ public class oopBC extends JFrame {
         for (int i = 0; i < count; i++) {
             if (accounts[i].getId() == id) {
                 return i;
-        
+
             }
-        }return -1;
+        }
+        return -1;
     }
 
     void swap(JPanel p) {
@@ -1225,8 +1221,8 @@ class BankAccount {
     public void withdrawWallet(double a) {
         if (wallet >= a) {
             wallet -= a;
-    
-        }}
+        }
+    }
 
     public void depositSavings(double a) {
         if (wallet >= a) {
@@ -1263,9 +1259,12 @@ class BankAccount {
 
     public void applySavingsInterest() {
         if (savings > 0 && lastSavingsDate != null) {
-            long d = ChronoUnit.DAYS.between(lastSavingsDate, LocalDateTime.now());
-            if (d > 0) {
-                savings += savings * 0.01 * d;
+            long days = ChronoUnit.DAYS.between(lastSavingsDate, LocalDateTime.now());
+            if (days >= 30) {
+                long months = days / 30;
+                for (int i = 0; i < months; i++) {
+                    savings *= 1.04;
+                }
                 lastSavingsDate = LocalDateTime.now();
             }
         }
@@ -1273,9 +1272,13 @@ class BankAccount {
 
     public void applyLoanInterest() {
         if (loanBalance > 0 && loanStartDate != null) {
-            long d = ChronoUnit.DAYS.between(loanStartDate, LocalDateTime.now());
-            if (d > 0) {
-                loanBalance += loanBalance * 0.05 * d;
+            long days = ChronoUnit.DAYS.between(loanStartDate, LocalDateTime.now());
+            if (days >= 30) {
+                long months = days / 30;
+                for (int i = 0; i < months; i++) {
+                    loanBalance *= 1.09;
+
+                }
                 loanStartDate = LocalDateTime.now();
             }
         }
@@ -1285,8 +1288,9 @@ class BankAccount {
         txHistory.addFirst(tx);
         if (txHistory.size() > 6) {
             txHistory.removeLast();
-    
-        }}
+
+        }
+    }
 
     public String[] getLastTransactions() {
         return txHistory.toArray(new String[0]);
